@@ -1,0 +1,36 @@
+body {
+	max-width: 70em;
+	margin: auto;
+	padding: 8px;
+}
+
+.showtypes [data-type='story'] {
+	text-decoration: underline;
+	text-decoration-color: red;
+}
+
+.showtypes [data-type='do'] {
+	text-decoration: underline;
+	text-decoration-color: green;
+}
+
+.showtypes [data-type='say'] {
+	text-decoration: underline;
+	text-decoration-color: blue;
+}
+
+span {
+	font-family: serif;
+}
+
+h1, h2 {
+	font-family: sans-serif;
+}
+
+#underlineactions {
+	display: block!important;
+}
+
+summary h2 {
+	display: inline;
+}
