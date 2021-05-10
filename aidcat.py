@@ -12,6 +12,7 @@ import uuid
 from time import sleep, strftime
 
 #Global variables
+aidcat_version = '0.5.7'
 access_token = ''
 target_username = ''
 content_cache = {'adventures': [], 'scenarios': [], 'scenario_options': [], 'worlds': [],
@@ -327,7 +328,7 @@ screen_flash = """
                        ██║   ╚██████╔╝╚██████╔╝███████╗██║  ██╗██║   ██║
                        ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝
 
-AI Dungeon Content Archive Toolkit (AID CAT) Copyright 2021 Curious Nekomimi."""[1:]
+AI Dungeon Content Archive Toolkit (AID CAT) v"""[1:]+aidcat_version+""" © 2021 Curious Nekomimi."""
 
 #The copyright notice is intended to annoy the people who don't like copyright notices. >:D
 screen_copyright = """
@@ -362,7 +363,7 @@ screen_quit = """
    ██║   ██║  ██║██║  ██║██║ ╚████║██║  ██╗       ██║   ╚██████╔╝╚██████╔╝██╗
    ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝       ╚═╝    ╚═════╝  ╚═════╝ ╚═╝
 
-...for using the AI Dungeon Content Archive Toolkit (AID CAT)!
+...for using the AI Dungeon Content Archive Toolkit (AID CAT) v"""[1:]+aidcat_version+"""!
 
 ...to an anonymous anon who wishes to remain anonymous for:
     The original script and giving me the inspiration to create AID CAT.
@@ -378,7 +379,7 @@ Report issues here:
     https://github.com/CuriousNekomimi/AIDCAT/issues
 
 License:
-    https://github.com/CuriousNekomimi/AIDCAT/blob/main/LICENSE"""[1:]
+    https://github.com/CuriousNekomimi/AIDCAT/blob/main/LICENSE"""
 
 # *hugs* Nya!
 screen_surprise = r"""
@@ -770,6 +771,7 @@ auth_menu_choices = [
     '[1] Change your access access token.',
     "[2] Save your access token (saves token to 'access_token.txt')",
     "[3] Wipe your access token (deletes 'access_token.txt').",
+    '[4] View your token. WARNING! NEVER LET ANYONE SEE YOUR TOKEN!',
     '[0] Return to main menu. [Default].\n'
 ]
 
@@ -779,7 +781,6 @@ def auth_menu():
         #Set the default menu choice.
         choice = 0
         clear_screen()
-        print(access_token)
         print(menu_header_auth_menu, menu_header, *auth_menu_choices, sep='\n')
         try:
             choice = int(input(f'Operation [0-{len(auth_menu_choices)-1}]: '))
@@ -807,6 +808,13 @@ def auth_menu():
             else:
                 print("No access_token.txt exists.")
             input(continue_text)
+       
+        elif choice == 4:
+            clear_screen()
+            print('WARNING! Never share this token! It grants full control of your AI Dungeon account!',\
+            f'\nStored x-access-token: {access_token}')
+            input(continue_text)
+            
         else:
             print(f'ERR: Input must be an integer from 0 to {len(auth_menu_choices)-1}. Try again!')
             sleep(1)
@@ -1032,7 +1040,7 @@ def our_content_menu():
 main_menu_choices = [
     '[1] Download your saved content. [Default]',
     "[2] Download another user's published content.",
-    '[3] Change or wipe your access access_token.',
+    '[3] Change, wipe, or view your access token.',
     '[0] Quit program.\n'
 ]
 
