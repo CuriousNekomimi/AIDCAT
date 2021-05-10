@@ -1,7 +1,7 @@
 # AI Dungeon Content Archive Toolkit
 A script that will automatically download your AI Dungeon worlds, scenarios, and adventures.
 
-# [Latest Release](https://github.com/CuriousNekomimi/AIDungeonRescue/releases)
+# [Latest Release](https://github.com/CuriousNekomimi/AIDCAT/releases)
 ### 2021-05-09: v0.5.6
 ```
 Thanks to Eta for these suggestions:
@@ -19,7 +19,7 @@ Recently, [Latitude](https://latitude.io/blog/update-to-our-community-ai-test-ap
 
 1. Before you can use the script, you must download and install the [Python 3 runtime](https://www.python.org/downloads/).
 2. The script needs your access token so it can access your private stories. The token will only be used for that purpose, and it will not be stored. See how to access it in [Firefox](/firefox.webm) or [Chrome](/chrome.webm).
-3. Download the aidcat.py script [here](https://github.com/CuriousNekomimi/AIDungeonRescue/releases). Move it to where you want your stories saved and run it. (usually by double-clicking, or typing `python aidcat.py` or `python3 aidcat.py` in the command prompt while in the directory containing the script file).
+3. Download the aidcat.py script [here](https://github.com/CuriousNekomimi/AIDCAT/releases). Move it to where you want your stories saved and run it. (usually by double-clicking, or typing `python aidcat.py` or `python3 aidcat.py` in the command prompt while in the directory containing the script file).
 4. Enter your login token and press enter. While you wait, think back to the good times you had with your fictional friends.
 5. When the download is complete, a file called stories.json will be created containing all your stories.
 
