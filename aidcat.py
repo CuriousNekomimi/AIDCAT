@@ -372,13 +372,13 @@ screen_quit = """
     and neatness. *happy perfectionist noises*
 
 Github repository:
-    https://github.com/CuriousNekomimi/AIDungeonRescue
+    https://github.com/CuriousNekomimi/AIDCAT
 
 Report issues here:
-    https://github.com/CuriousNekomimi/AIDungeonRescue/issues
+    https://github.com/CuriousNekomimi/AIDCAT/issues
 
 License:
-    https://github.com/CuriousNekomimi/AIDungeonRescue/blob/main/LICENSE"""[1:]
+    https://github.com/CuriousNekomimi/AIDCAT/blob/main/LICENSE"""[1:]
 
 # *hugs* Nya!
 screen_surprise = r"""
