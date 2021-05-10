@@ -2,7 +2,7 @@
 A script that will automatically download your AI Dungeon worlds, scenarios, and adventures.
 
 # [Latest Release](https://github.com/CuriousNekomimi/AIDCAT/releases)
-### 2021-05-09: v0.5.6
+### 2021-05-09: v0.5.7
 ```
 Thanks to Eta for these suggestions:
 UUID (access token) validation using python's built-in uuid library.
