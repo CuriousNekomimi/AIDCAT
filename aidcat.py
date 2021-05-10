@@ -1,8 +1,8 @@
-'''
+"""
 Created on May 6, 2021
 
 @author: Curious Nekomimi
-'''
+"""
 import json
 import urllib.request
 import urllib.error
@@ -11,12 +11,13 @@ import sys
 import uuid
 from time import sleep, strftime
 
-#Global variables
+# Global variables
 aidcat_version = '0.5.7'
 access_token = ''
 target_username = ''
-content_cache = {'adventures': [], 'scenarios': [], 'scenario_options': [], 'worlds': [],
-'posts': [], 'friends': [], 'followers': [], 'following': []
+content_cache = {
+    'adventures': [], 'scenarios': [], 'scenario_options': [], 'worlds': [],
+    'posts': [], 'friends': [], 'followers': [], 'following': []
 }
 continue_text = '\nPress any key to continue...'
 
@@ -251,7 +252,7 @@ fragment WorldImageWorld on World {
 query_social = {
     "variables": {
         "username": ""
-    }, 
+    },
     'query': """
 query($username: String) {
     user(username: $username) {
@@ -330,7 +331,7 @@ screen_flash = """
 
 AI Dungeon Content Archive Toolkit (AID CAT) v"""[1:]+aidcat_version+""" © 2021 Curious Nekomimi."""
 
-#The copyright notice is intended to annoy the people who don't like copyright notices. >:D
+# The copyright notice is intended to annoy the people who don't like copyright notices. >:D
 screen_copyright = """
 MIT License
 
@@ -354,7 +355,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE."""[1:]
 
-#Information to show on program close.
+# Information to show on program close.
 screen_quit = """
 ████████╗██╗  ██╗ █████╗ ███╗   ██╗██╗  ██╗    ██╗   ██╗ ██████╗ ██╗   ██╗██╗
 ╚══██╔══╝██║  ██║██╔══██╗████╗  ██║██║ ██╔╝    ╚██╗ ██╔╝██╔═══██╗██║   ██║██║
@@ -420,7 +421,7 @@ m ,         .,,              ,|▄▄▓██████▓▓▓▒▄▄▄,
 █▓∩   ..,(▒█▌  └M  └╙▀▀██████╩.    ,||||||||||||└╙╙╙∩||||||||||||||{│││∩██▓╚│││╠
 ▀██▒▄  |#▓██▒,         │∩  ,│∩  ,|||||||||||||||||||└╠MW∩|||||]{{⌠│││││∩╙██M|│││"""[1:]
 
-#Headers for menus.
+# Headers for menus.
 menu_header = '\nAvailable operations:\n'
 
 menu_header_main = """
@@ -455,17 +456,19 @@ menu_header_auth_menu = """
 ██║  ██║╚██████╔╝   ██║   ██║  ██║    ██║ ╚═╝ ██║███████╗██║ ╚████║╚██████╔╝
 ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝    ╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝"""[1:]
 
-#Tries to clear the user's screen. Skips on exception.
+
+# Tries to clear the user's screen. Skips on exception.
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-#Gets the user's x-access-token. Tries to load from file first.
-#REFACTOR with UUID
+
+# Gets the user's x-access-token. Tries to load from file first.
+# REFACTOR with UUID
 def get_token():
     global access_token
     try:
         clear_screen()
-        if access_token =='':
+        if access_token == '':
             print('Getting from file')
             with open('access_token.txt', 'r') as f:
                 access_token = f.read().strip()
@@ -475,11 +478,12 @@ def get_token():
             print('Invalid token detected. Should be a valid UUID.')
             set_token()
     except:
-            print('Saved token not found...')
-            set_token()
+        print('Saved token not found...')
+        set_token()
 
-#Prompts the user for an x-access-token and stores it globally.
-#REFACTOR with UUID
+
+# Prompts the user for an x-access-token and stores it globally.
+# REFACTOR with UUID
 def set_token():
     global access_token
     try:
@@ -493,6 +497,7 @@ def set_token():
         print('Invalid token detected. Should be a valid UUID. Please try again.')
         input(continue_text)
 
+
 def save_token():
     global access_token
     try:
@@ -504,6 +509,7 @@ def save_token():
         print('Something went wrong saving your access token.')
     input(continue_text)
 
+
 def auth_user():
     while access_token == '':
         try:
@@ -511,7 +517,8 @@ def auth_user():
         except:
             set_token()
 
-def get_scenarios(target_user = '', is_saved = False):
+
+def get_scenarios(target_user='', is_saved=False):
     global content_cache
     global query_scenarios
     content_cache['scenarios'] = []
@@ -524,7 +531,8 @@ def get_scenarios(target_user = '', is_saved = False):
     query_scenarios['variables']['input']['offset'] = 0
     query_scenarios['variables']['username'] = target_user
     while True:
-        req = urllib.request.Request('https://api.aidungeon.io/graphql', headers={"x-access-token": access_token, "content-type": "application/json"})
+        req = urllib.request.Request('https://api.aidungeon.io/graphql',
+                                     headers={"x-access-token": access_token, "content-type": "application/json"})
         res = None
         
         try:
@@ -542,9 +550,9 @@ def get_scenarios(target_user = '', is_saved = False):
                 print('Got %d scenarios...' % len(content_cache['scenarios']))
                 query_scenarios['variables']['input']['offset'] = len(content_cache['scenarios'])
                 for scenario in result['data']['user']['search']:
-                        if 'options' in scenario and type(scenario['options']) is list:
-                            for option in scenario['options']:
-                                content_cache['scenario_options'].append(option['publicId'])
+                    if 'options' in scenario and type(scenario['options']) is list:
+                        for option in scenario['options']:
+                            content_cache['scenario_options'].append(option['publicId'])
             else:
                 print('No more scenarios found.')
                 break
@@ -557,13 +565,15 @@ def get_scenarios(target_user = '', is_saved = False):
     else:
         print('No scenarios to save!')
 
+
 def get_subscenarios():
     global content_cache
     global query_options
     for pubid in content_cache['scenario_options']:
         print('Getting subscenario %s...' % pubid)
         query_options['variables']['publicId'] = pubid
-        req = urllib.request.Request('https://api.aidungeon.io/graphql', headers={"x-access-token": access_token, "content-type": "application/json"})
+        req = urllib.request.Request('https://api.aidungeon.io/graphql',
+                                     headers={"x-access-token": access_token, "content-type": "application/json"})
         res = None
         
         try:
@@ -584,8 +594,9 @@ def get_subscenarios():
         else:
             print('There was no data...')
     content_cache['scenario_options'] = []
-    
-def get_adventures(target_user = '', is_saved = False):
+
+
+def get_adventures(target_user='', is_saved=False):
     global content_cache
     global query_adventures
     content_cache['adventures'] = []
@@ -597,7 +608,8 @@ def get_adventures(target_user = '', is_saved = False):
     query_adventures['variables']['input']['offset'] = 0
     query_adventures['variables']['username'] = target_user
     while True:
-        req = urllib.request.Request('https://api.aidungeon.io/graphql', headers={"x-access-token": access_token, "content-type": "application/json"})
+        req = urllib.request.Request('https://api.aidungeon.io/graphql',
+                                     headers={"x-access-token": access_token, "content-type": "application/json"})
         res = None
         
         try:
@@ -625,7 +637,8 @@ def get_adventures(target_user = '', is_saved = False):
     else:
         print('No adventures to save!')
 
-def get_posts(target_user = '', is_saved = False):
+
+def get_posts(target_user='', is_saved=False):
     global content_cache
     global query_posts
     content_cache['posts'] = []
@@ -637,7 +650,8 @@ def get_posts(target_user = '', is_saved = False):
     query_posts['variables']['input']['offset'] = 0
     query_posts['variables']['username'] = target_user
     while True:
-        req = urllib.request.Request('https://api.aidungeon.io/graphql', headers={"x-access-token": access_token, "content-type": "application/json"})
+        req = urllib.request.Request('https://api.aidungeon.io/graphql',
+                                     headers={"x-access-token": access_token, "content-type": "application/json"})
         res = None
         
         try:
@@ -660,18 +674,20 @@ def get_posts(target_user = '', is_saved = False):
         else:
             print('There was no data...')
             break
-        
+    
     if content_cache['posts']:
         save_json(target_user, is_saved, 'posts')
     else:
         print('No posts to save!')
+
 
 def get_worlds():
     global content_cache
     global query_worlds
     content_cache['worlds'] = []
     print('Getting worlds...')
-    req = urllib.request.Request('https://api.aidungeon.io/graphql', headers={"x-access-token": access_token, "content-type": "application/json"})
+    req = urllib.request.Request('https://api.aidungeon.io/graphql',
+                                 headers={"x-access-token": access_token, "content-type": "application/json"})
     res = None
     
     try:
@@ -692,7 +708,8 @@ def get_worlds():
     else:
         print('No worlds to save!')
 
-def get_social(target_user = ''):
+
+def get_social(target_user=''):
     global content_cache
     global query_social
     content_cache['friends'] = []
@@ -700,7 +717,8 @@ def get_social(target_user = ''):
     content_cache['following'] = []
     print('Getting friends, followers, and following...')
     query_social['variables']['username'] = target_user
-    req = urllib.request.Request('https://api.aidungeon.io/graphql', headers={"x-access-token": access_token, "content-type": "application/json"})
+    req = urllib.request.Request('https://api.aidungeon.io/graphql',
+                                 headers={"x-access-token": access_token, "content-type": "application/json"})
     res = None
     
     try:
@@ -736,7 +754,8 @@ def get_social(target_user = ''):
     else:
         print('No following to save!')
 
-#Close the program.
+
+# Close the program.
 def program_quit():
     clear_screen()
     print(screen_quit)
@@ -750,9 +769,10 @@ def program_quit():
     input('\nPress any key to nya...')
     sys.exit()
 
-#Expects a username, whether or not the data is from a bookmark
-def save_json(target_user = '', is_saved = False, content_type = ''):
-    #Current local time in ISO 8601 format.
+
+# Expects a username, whether or not the data is from a bookmark
+def save_json(target_user='', is_saved=False, content_type=''):
+    # Current local time in ISO 8601 format.
     time_now = strftime('%Y%m%dT%H%M%S')
     file_name = ''
     if target_user == '':
@@ -766,40 +786,42 @@ def save_json(target_user = '', is_saved = False, content_type = ''):
         json.dump(content_cache[content_type], f, ensure_ascii=False, indent=8)
     print(f'Saved to {file_name}.')
 
-#Authorization menu choices.
+
+# Authorization menu choices.
 auth_menu_choices = [
-    '[1] Change your access access token.',
+    '[1] Change your access token.',
     "[2] Save your access token (saves token to 'access_token.txt')",
     "[3] Wipe your access token (deletes 'access_token.txt').",
     '[4] View your token. WARNING! NEVER LET ANYONE SEE YOUR TOKEN!',
     '[0] Return to main menu. [Default].\n'
 ]
 
-#The authorization menu.
+
+# The authorization menu.
 def auth_menu():
     while True:
-        #Set the default menu choice.
+        # Set the default menu choice.
         choice = 0
         clear_screen()
         print(menu_header_auth_menu, menu_header, *auth_menu_choices, sep='\n')
         try:
-            choice = int(input(f'Operation [0-{len(auth_menu_choices)-1}]: '))
+            choice = int(input(f'Operation [0-{len(auth_menu_choices) - 1}]: '))
         except:
             pass
         
-        #Return to the main menu.
+        # Return to the main menu.
         if choice == 0:
             break
         
-        #Set access access_token.
+        # Set access access_token.
         elif choice == 1:
             set_token()
-       
-        #Save access token to file.
+        
+        # Save access token to file.
         elif choice == 2:
             save_token()
         
-        #Wipe access access_token.
+        # Wipe access access_token.
         elif choice == 3:
             clear_screen()
             if os.path.exists("access_token.txt"):
@@ -811,18 +833,19 @@ def auth_menu():
        
         elif choice == 4:
             clear_screen()
-            print('WARNING! Never share this token! It grants full control of your AI Dungeon account!',\
-            f'\nStored x-access-token: {access_token}')
+            print('WARNING! Never share this token! It grants full control of your AI Dungeon account!',
+                  f'\nStored x-access-token: {access_token}')
             input(continue_text)
             
         else:
-            print(f'ERR: Input must be an integer from 0 to {len(auth_menu_choices)-1}. Try again!')
+            print(f'ERR: Input must be an integer from 0 to {len(auth_menu_choices) - 1}. Try again!')
             sleep(1)
+
 
 your_content_menu_choices = [
     '[1] Download your scenarios.',
     '[2] Download your adventures.',
-    '[3] Download your posts.',\
+    '[3] Download your posts.',
     '[4] Download your worlds (includes purchased worlds).',
     '[5] Download your friends, followers, and following.',
     '[6] Download your saves (bookmarks).',
@@ -830,19 +853,20 @@ your_content_menu_choices = [
     '[0] Return to main menu. [Default]\n'
 ]
 
-#User content download menu.
+
+# User content download menu.
 def your_content_menu():
     while True:
-        #Set the default menu choice.
+        # Set the default menu choice.
         choice = 0
         clear_screen()
         print(menu_header_your_content, menu_header, *your_content_menu_choices, sep='\n')
         try:
-            choice = int(input(f'Operation [0-{len(your_content_menu_choices)-1}]: '))
+            choice = int(input(f'Operation [0-{len(your_content_menu_choices) - 1}]: '))
         except:
             pass
         
-        #Return to the main menu.
+        # Return to the main menu.
         if choice == 0:
             break
         
@@ -852,7 +876,7 @@ def your_content_menu():
                 get_scenarios()
             except:
                 print('An error occurred saving your scenarios.')
-            input(continue_text)       
+            input(continue_text)
         
         elif choice == 2:
             clear_screen()
@@ -877,7 +901,7 @@ def your_content_menu():
             except:
                 print('An error occurred saving your worlds.')
             input(continue_text)
-       
+        
         elif choice == 5:
             clear_screen()
             try:
@@ -895,7 +919,7 @@ def your_content_menu():
             except:
                 print('An error occurred saving your bookmarks.')
             input(continue_text)
-            
+        
         elif choice == 7:
             clear_screen()
             try:
@@ -932,38 +956,39 @@ def your_content_menu():
             input(continue_text)
         
         else:
-            print(f'ERR: Input must be an integer from 0 to {len(your_content_menu_choices)-1}. Try again!')
+            print(f'ERR: Input must be an integer from 0 to {len(your_content_menu_choices) - 1}. Try again!')
             sleep(1)
 
 
 def our_content_menu_choices():
     return [
-    f"[1] Download {target_username}'s published scenarios.",
-    f"[2] Download {target_username}'s published adventures.",
-    f"[3] Download {target_username}'s published posts.",
-    f"[4] Download {target_username}'s friends, followers, and following.",
-    '[5] Download all of the above.',
-    '[6] Change target user.',
-    '[0] Return to main menu. [Default]\n'
-]
+        f"[1] Download {target_username}'s published scenarios.",
+        f"[2] Download {target_username}'s published adventures.",
+        f"[3] Download {target_username}'s published posts.",
+        f"[4] Download {target_username}'s friends, followers, and following.",
+        '[5] Download all of the above.',
+        '[6] Change target user.',
+        '[0] Return to main menu. [Default]\n'
+    ]
 
-#Other user content download menu
+
+# Other user content download menu
 def our_content_menu():
     global target_username
     while len(target_username) <= 0:
         clear_screen()
         target_username = input("Target user's AI Dungeon username: ")
     while True:
-        #Set the default menu choice.
+        # Set the default menu choice.
         choice = 0
         clear_screen()
         print(menu_header_our_content, menu_header, *our_content_menu_choices(), sep='\n')
         try:
-            choice = int(input(f'Operation [0-{len(our_content_menu_choices())-1}]: '))
+            choice = int(input(f'Operation [0-{len(our_content_menu_choices()) - 1}]: '))
         except:
             pass
         
-        #Return to the main menu.
+        # Return to the main menu.
         if choice == 0:
             break
         
@@ -979,7 +1004,7 @@ def our_content_menu():
             clear_screen()
             try:
                 get_adventures(target_username)
-
+            
             except:
                 pass
             input(continue_text)
@@ -1031,12 +1056,13 @@ def our_content_menu():
             except:
                 print('An error occurred setting the target user.')
             input(continue_text)
-               
+        
         else:
-            print(f'ERR: Input must be an integer from 0 to {len(our_content_menu_choices())-1}. Try again!')
+            print(f'ERR: Input must be an integer from 0 to {len(our_content_menu_choices()) - 1}. Try again!')
             sleep(1)
 
-#Main menu choices.
+
+# Main menu choices.
 main_menu_choices = [
     '[1] Download your saved content. [Default]',
     "[2] Download another user's published content.",
@@ -1044,15 +1070,16 @@ main_menu_choices = [
     '[0] Quit program.\n'
 ]
 
-#The main menu.
+
+# The main menu.
 def main_menu():
     while True:
-        #Set the default menu choice.
+        # Set the default menu choice.
         choice = 1
         clear_screen()
         print(menu_header_main, menu_header, *main_menu_choices, sep='\n')
         try:
-            choice = int(input(f'Operation [0-{len(main_menu_choices)-1}]: '))
+            choice = int(input(f'Operation [0-{len(main_menu_choices) - 1}]: '))
         except:
             pass
         if choice == 0:
@@ -1064,9 +1091,10 @@ def main_menu():
         elif choice == 3:
             auth_menu()
         else:
-            print(f'ERR: Input must be an integer from 0 to {len(main_menu_choices)-1}. Try again!')
+            print(f'ERR: Input must be an integer from 0 to {len(main_menu_choices) - 1}. Try again!')
             sleep(1)
- 
+
+
 def main():
     clear_screen()
     print(screen_flash)
@@ -1076,6 +1104,7 @@ def main():
     input(continue_text)
     auth_user()
     main_menu()
+
 
 if __name__ == '__main__':
     main()
