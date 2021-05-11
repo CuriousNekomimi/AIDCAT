@@ -1,8 +1,15 @@
-# AI Dungeon Content Archive Toolkit
-A script that will automatically download your AI Dungeon worlds, scenarios, and adventures.
+# AI Dungeon Content Archive Toolkit (AID CAT)
+
+AID CAT is a command-line utility that will allow you to download json file backups of:
+ 1. Your private and published AI Dungeon scenarios, adventures, posts, bookmarks, worlds, friend, followers, and following.
+ 2. Any user's published scenarios, adventures, and posts, as well as their friend, followers, and following.
+
+Things AID CAT will **NEVER** do:
+ 1. Download another user's private content.
+ 2. Share your information with anyone else. All data transfed is strictly between your device and the aidungeon.io GraphGL backend.
 
 ## [Go check out KoboldAI!](https://github.com/KoboldAI/KoboldAI-Client)
-Saved AI Dungeon games exported using AID CAT can now be imported and played with [KoboldAI](https://github.com/KoboldAI/KoboldAI-Client)! KoboldAI is a browser front-end for playing with multiple local & remote AI models. KoboldAI supports interact with the AI models via Tensorflow and includes a easy-to-use automated install process. Currently supported models are GPT Neo 1.3B/2.7B, GPT-2 Med/Large/XL, Megatron (via InferKit API) as well as the ability to run your fine-tuned custom GPT-Neo (e.g., Neo-horni) and custom GPT-2 (e.g., CloverEdition) models.
+**Saved AI Dungeon games exported using AID CAT can now be imported and played with [KoboldAI](https://github.com/KoboldAI/KoboldAI-Client)!** KoboldAI is a browser front-end for playing with multiple local & remote AI models. KoboldAI supports interact with the AI models via Tensorflow and includes a easy-to-use automated install process. Currently supported models are GPT Neo 1.3B/2.7B, GPT-2 Med/Large/XL, Megatron (via InferKit API) as well as the ability to run your fine-tuned custom GPT-Neo (e.g., Neo-horni) and custom GPT-2 (e.g., CloverEdition) models.
 
 ## [Latest Release](https://github.com/CuriousNekomimi/AIDCAT/releases)
 ### 2021-05-11: v0.6.0
