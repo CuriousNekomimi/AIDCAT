@@ -12,10 +12,9 @@ import uuid
 from time import sleep, strftime
 
 # Global variables
-aidcat_version = '0.5.7'
+aidcat_version = '0.6.0'
 access_token = ''
 continue_text = '\nPress Enter to continue...'
-
 
 class User:
     def __init__(self, user=''):
@@ -462,6 +461,21 @@ def get_token():
         set_token()
 
 
+# Close the program.
+def program_quit():
+    clear_screen()
+    print(screen_quit)
+    input(continue_text)
+    clear_screen()
+    print('SURPRISE HUG!')
+    sleep(1.5)
+    for line in screen_surprise.split('\n'):
+        print(line)
+        sleep(0.01)
+    input('\nPress Enter to nya...')
+    sys.exit()
+
+
 # Prompts the user for an x-access-token and stores it globally.
 def set_token():
     global access_token
@@ -495,21 +509,6 @@ def auth_user():
             get_token()
         except:
             set_token()
-
-
-# Close the program.
-def program_quit():
-    clear_screen()
-    print(screen_quit)
-    input(continue_text)
-    clear_screen()
-    print('SURPRISE HUG!')
-    sleep(1.5)
-    for line in screen_surprise.split('\n'):
-        print(line)
-        sleep(0.01)
-    input('\nPress Enter to nya...')
-    sys.exit()
 
 
 # Authorization menu choices.
