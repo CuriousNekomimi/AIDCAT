@@ -1,7 +1,7 @@
 # AI Dungeon Content Archive Toolkit (AID CAT)
 
 AID CAT is a command-line utility that will allow you to download JSON backups of:
- 1. Your private and published AI Dungeon scenarios, adventures, posts, bookmarks, worlds, friend, followers, and following.
+ 1. Your private and published AI Dungeon scenarios, adventures, posts, bookmarks, worlds, friends, followers, and following.
  2. Any user's published scenarios, adventures, and posts, as well as their friend, followers, and following.
 
 Things AID CAT will **NEVER** do:
