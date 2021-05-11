@@ -1,15 +1,33 @@
 # AI Dungeon Content Archive Toolkit
 A script that will automatically download your AI Dungeon worlds, scenarios, and adventures.
 
-# [Latest Release](https://github.com/CuriousNekomimi/AIDCAT/releases)
-### 2021-05-09: v0.5.7
-```
-Thanks to Eta for these suggestions:
-UUID (access token) validation using python's built-in uuid library.
-Cleaned up boolean checks.
-Better file management. Saving files no longer risks a memory leak if the programmer forgets to call close().
-```
+## [Go check out KoboldAI!](https://github.com/KoboldAI/KoboldAI-Client)
+Saved AI Dungeon games exported using AID CAT can now be imported and played with [KoboldAI](https://github.com/KoboldAI/KoboldAI-Client)! KoboldAI is a browser front-end for playing with multiple local & remote AI models. KoboldAI supports interact with the AI models via Tensorflow and includes a easy-to-use automated install process. Currently supported models are GPT Neo 1.3B/2.7B, GPT-2 Med/Large/XL, Megatron (via InferKit API) as well as the ability to run your fine-tuned custom GPT-Neo (e.g., Neo-horni) and custom GPT-2 (e.g., CloverEdition) models.
 
+## [Latest Release](https://github.com/CuriousNekomimi/AIDCAT/releases)
+### 2021-05-11: v0.6.0
+```
+HUGE thanks to Eta0 for making these improvements and for refactoring the program to be object oriented:
+- The phrase "any key" was changed to "Enter." (Actually waiting for any keypress is significantly more complicated).
+- Option 1 of the auth menu previously said [1] Change your access access token, which was fixed.
+- Added a missing error message on "Our Content" page.
+- PEP 8 compliance:
+  - The header docstring was changed to use """ instead of '''
+  - Fixed whitespace around operators in code and method declarations
+  - Fixed indentation in a couple places
+  - Added whitespace between the # and the start of each comment
+  - Added a newline at the end of the file
+  - Added two lines of whitespace before and after function definitions
+  - (Non-PEP 8) Changed menu choices to all be double quoted strings, for consistency
+- Removed default values from actually-mandatory method parameters like save_json's content_type
+- Separated the long as heck query strings from the rest of the code and moved them to the bottom of the file, just above if __name__ == '__main__', to improve readability
+- Added a User class
+  - This class encompasses the operations make_query (new), save_json, get_scenarios/subscenarios/adventures/posts/worlds/social, and get_saves (new, which calls all of the bookmarked operations together)
+  - It holds the fields content_cache, and each of the query_s as instance variables (no longer global)
+    - This means these can be maintained independently per user, which will help a lot with the batch download feature later on (it allows that to be multithreaded, for example)
+- All of the menu code was changed to use User objects representing different users instead of passing around a username parameter
+- The menu code was additionally refactored to cut down on duplicated code by a lot
+```
 Instructions below copied with edits from original script author's site (referenced files uploaded here for archival purposes):
 
 ## The wAIfupocalypse is upon us
@@ -31,6 +49,15 @@ You can run these scripts using [Termux](https://termux.com/) (Android) or [Pyth
 
 ## Changelog
 ```
+2021-05-10: v0.5.7
+Thanks to Eta for these suggestions:
+UUID (access token) validation using python's built-in uuid library.
+Cleaned up boolean checks.
+Better file management. Saving files no longer risks a memory leak if the programmer forgets to call close().
+
+2021-05-09: v0.5.6
+Various improvements to the code in terms of efficiency and syntax, thanks Eta!
+
 2021-05-09: v0.5.4
 Changed aidcat.py to UTF-8 encoding. If you were seeing weird issues with screens, like corrupted text, this should fix that issue.
 Thanks to Eta for the great suggestions for improving efficiency and helping with refactoring overall, including:
