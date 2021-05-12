@@ -16,6 +16,7 @@ aidcat_version = '0.6.0'
 access_token = ''
 continue_text = '\nPress Enter to continue...'
 
+
 class User:
     def __init__(self, user=''):
         self.user = user
