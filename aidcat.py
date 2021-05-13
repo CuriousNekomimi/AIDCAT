@@ -11,7 +11,7 @@ import sys
 import uuid
 from time import sleep, strftime
 
-aidcat_version = '0.6.0'
+aidcat_version = '0.6.2'
 
 
 class User:
