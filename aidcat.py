@@ -11,13 +11,12 @@ import sys
 import uuid
 from time import sleep, strftime
 
-# Global variables
 aidcat_version = '0.6.0'
-access_token = ''
-continue_text = '\nPress Enter to continue...'
 
 
 class User:
+    access_token = None
+    
     def __init__(self, user=''):
         self.user = user
         self.content_cache = {
@@ -84,9 +83,11 @@ class User:
         }
     
     @staticmethod
-    def make_query(query):
+    def make_query(query, token=None):
+        if token is None:
+            token = User.access_token
         req = urllib.request.Request('https://api.aidungeon.io/graphql',
-                                     headers={"x-access-token": access_token, "content-type": "application/json"})
+                                     headers={"x-access-token": token, "content-type": "application/json"})
         res = urllib.request.urlopen(req, data=json.dumps(query).encode('utf8'))
         return json.loads(res.read())
     
@@ -443,30 +444,15 @@ def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
-# Gets the user's x-access-token. Tries to load from file first.
-def get_token():
-    global access_token
-    try:
-        clear_screen()
-        if access_token == '':
-            print('Getting from file')
-            with open('access_token.txt', 'r') as f:
-                access_token = f.read().strip()
-        try:
-            uuid.UUID(access_token)
-        except:
-            print('Invalid token detected. Should be a valid UUID.')
-            set_token()
-    except:
-        print('Saved token not found...')
-        set_token()
+def pause():
+    input('\nPress Enter to continue...')
 
 
 # Close the program.
 def program_quit():
     clear_screen()
     print(screen_quit)
-    input(continue_text)
+    pause()
     clear_screen()
     print('SURPRISE HUG!')
     sleep(1.5)
@@ -477,39 +463,90 @@ def program_quit():
     sys.exit()
 
 
-# Prompts the user for an x-access-token and stores it globally.
-def set_token():
-    global access_token
-    try:
+class Token:
+    # This is an abstract class which groups together static methods for handling x-access-tokens.
+    
+    # Gets the user's x-access-token. Tries to load from file first, and will prompt the user otherwise.
+    @staticmethod
+    def get():
+        return Token.load() or Token.prompt()
+    
+    # Loads the user's x-access-token from a file.
+    @staticmethod
+    def load():
         clear_screen()
-        input_token = input('Please enter your access token (UUID with hyphens): ')
-        uuid.UUID(input_token)
-        access_token = input_token
-        if input('Would you like to save your token for later? (y/n): ').lower().strip()[:1] == 'y':
-            save_token()
-    except:
-        print('Invalid token detected. Should be a valid UUID. Please try again.')
-        input(continue_text)
+        print('Getting from file')
+        try:
+            with open('access_token.txt', 'r') as f:
+                token = f.read().strip()
+                token = Token.validate(token)
+                print(f'Token loaded for account {Token.user(token)}.')
+                return token
+        except IOError:
+            print('Saved token not found...')
+        except ValueError as e:
+            print(e)
+        
+        return None
 
-
-def save_token():
-    global access_token
-    try:
+    # Prompts the user for an x-access-token until a valid one is given, and prompts to save the given token.
+    @staticmethod
+    def prompt(can_exit=False):
+        while True:
+            # Loop until a valid token is given
+            clear_screen()
+            if can_exit:
+                token = input('Please enter your access token (UUID), or press Enter to go back: ')
+                if not token.strip():
+                    return None
+            else:
+                token = input('Please enter your access token (UUID): ').strip()
+            try:
+                token = Token.validate(token)
+                print(f'\nToken loaded for account {Token.user(token)}.')
+                if input('Would you like to save your token for later? (y/n): ').lower().strip()[:1] == 'y':
+                    Token.save(token)
+                return token
+            except ValueError as e:
+                print(e, 'Please try again.')
+                pause()
+    
+    # Save's the user's x-access-token to 'access_token.txt'.
+    @staticmethod
+    def save(token):
         clear_screen()
-        with open('access_token.txt', 'w') as f:
-            f.write(access_token)
-        print("Token saved to 'access_token.txt'.")
-    except:
-        print('Something went wrong saving your access token.')
-    input(continue_text)
+        try:
+            with open('access_token.txt', 'w') as f:
+                f.write(token)
+            print("Token saved to 'access_token.txt'.")
+        except IOError:
+            print('Something went wrong saving your access token.')
+        pause()
+
+    # Retrieves the account username associated with a token. Returns None for an invalid token.
+    @staticmethod
+    def user(token):
+        result = User.make_query({'query': '{user {username}}'}, token)
+        if result['data']['user']:
+            return result['data']['user']['username']
+        else:
+            return None
+
+    # Validates a user token. Returns the correct token on success, otherwise raises a ValueError.
+    @staticmethod
+    def validate(token):
+        try:
+            token = str(uuid.UUID(token))  # validates the token as a UUID
+        except ValueError:
+            raise ValueError("Invalid token format detected. Should be a valid UUID.")
+        if Token.user(token) is None:
+            raise ValueError("Invalid token detected. The token provided is not associated with any account.")
+        
+        return token
 
 
 def auth_user():
-    while access_token == '':
-        try:
-            get_token()
-        except:
-            set_token()
+    User.access_token = Token.get()
 
 
 # Authorization menu choices.
@@ -539,15 +576,16 @@ def auth_menu():
         if choice == 0:
             break
         
-        # Set access access_token.
+        # Set access_token.
         elif choice == 1:
-            set_token()
+            # If Token.promp() returns None, don't change the value of User.access_token.
+            User.access_token = Token.prompt(can_exit=True) or User.access_token
         
-        # Save access token to file.
+        # Save access_token to file.
         elif choice == 2:
-            save_token()
+            Token.save(User.access_token)
         
-        # Wipe access access_token.
+        # Wipe access_token.
         elif choice == 3:
             clear_screen()
             if os.path.exists("access_token.txt"):
@@ -555,13 +593,13 @@ def auth_menu():
                 print('Deleted access_token.txt.')
             else:
                 print("No access_token.txt exists.")
-            input(continue_text)
+            pause()
        
         elif choice == 4:
             clear_screen()
             print('WARNING! Never share this token! It grants full control of your AI Dungeon account!',
-                  f'\nStored x-access-token: {access_token}')
-            input(continue_text)
+                  f'\nStored x-access-token: {User.access_token}')
+            pause()
             
         else:
             print(f'ERR: Input must be an integer from 0 to {num_choices}. Try again!')
@@ -627,7 +665,7 @@ def your_content_menu():
             sleep(1)
             continue
         
-        input(continue_text)
+        pause()
 
 
 def our_content_menu_choices(target_username):
@@ -698,7 +736,7 @@ def our_content_menu():
             sleep(1)
             continue
         
-        input(continue_text)
+        pause()
 
 
 # Main menu choices.
@@ -738,10 +776,10 @@ def main_menu():
 def main():
     clear_screen()
     print(screen_flash)
-    input(continue_text)
+    pause()
     clear_screen()
     print(screen_copyright)
-    input(continue_text)
+    pause()
     auth_user()
     main_menu()
 
