@@ -569,7 +569,7 @@ def auth_menu():
         num_choices = len(auth_menu_choices) - 1
         try:
             choice = int(input(f'Operation [0-{num_choices}]: '))
-        except:
+        except ValueError:
             pass
         
         # Return to the main menu.
@@ -650,14 +650,14 @@ def your_content_menu():
             content_type = content_types[choice - 1]
             try:
                 action()
-            except:
+            except Exception:
                 print(f'An error occurred saving your {content_type}.')
         
         elif choice == 7:
             for action, content_type in zip(actions, content_types):
                 try:
                     action()
-                except:
+                except Exception:
                     print(f'An error occurred saving your {content_type}.')
         
         else:
@@ -715,20 +715,20 @@ def our_content_menu():
             content_type = content_types[choice - 1]
             try:
                 action()
-            except:
+            except Exception:
                 print(f"An error occurred saving {target_username}'s {content_type}.")
         
         elif choice == 5:
             for action, content_type in zip(actions, content_types):
                 try:
                     action()
-                except:
+                except Exception:
                     print(f"An error occurred saving {target_username}'s {content_type}.")
         
         elif choice == 6:
             try:
                 target_username = input("Target user's AI Dungeon username: ")
-            except:
+            except Exception:
                 print('An error occurred setting the target user.')
         
         else:
@@ -758,7 +758,7 @@ def main_menu():
         num_choices = len(main_menu_choices) - 1
         try:
             choice = int(input(f'Operation [0-{num_choices}]: '))
-        except:
+        except ValueError:
             pass
         if choice == 0:
             program_quit()
@@ -774,14 +774,18 @@ def main_menu():
 
 
 def main():
-    clear_screen()
-    print(screen_flash)
-    pause()
-    clear_screen()
-    print(screen_copyright)
-    pause()
-    auth_user()
-    main_menu()
+    try:
+        clear_screen()
+        print(screen_flash)
+        pause()
+        clear_screen()
+        print(screen_copyright)
+        pause()
+        auth_user()
+        main_menu()
+    except KeyboardInterrupt:
+        from signal import SIGINT
+        sys.exit(SIGINT.value)
 
 
 ccs_scenario = """
