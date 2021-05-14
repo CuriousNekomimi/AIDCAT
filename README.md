@@ -12,7 +12,7 @@ Things AID CAT will **NEVER** do:
 **Saved AI Dungeon games exported using AID CAT can now be imported and played with [KoboldAI](https://github.com/KoboldAI/KoboldAI-Client)!** KoboldAI is a browser front-end for playing with multiple local & remote AI models. KoboldAI supports interact with the AI models via Tensorflow and includes a easy-to-use automated install process. Currently supported models are GPT Neo 1.3B/2.7B, GPT-2 Med/Large/XL, Megatron (via InferKit API) as well as the ability to run your fine-tuned custom GPT-Neo (e.g., Neo-horni) and custom GPT-2 (e.g., CloverEdition) models.
 
 ## [Latest Release](https://github.com/CuriousNekomimi/AIDCAT/releases)
-### 2021-05-11: v0.6.0
+### 2021-05-11: v0.6.2
 ```
 HUGE thanks to Eta for making these improvements and for refactoring the program to be object oriented:
 - The phrase "any key" was changed to "Enter." (Actually waiting for any keypress is significantly more complicated).
@@ -48,7 +48,7 @@ Recently, [Latitude](https://latitude.io/blog/update-to-our-community-ai-test-ap
 4. Enter your login token and press enter. While you wait, think back to the good times you had with your fictional friends.
 5. When the download is complete, a file called stories.json will be created containing all your stories.
 
-I have also created a script that will turn that JSON file into HTML files so it's easier to read. Download it [here](/genhtml.py) and run it in the same folder as the JSON file. You might also want to get this [stylesheet](/style.css) (put in same folder as html files) to make things look a little nicer.
+I have also created a script that will turn that JSON file into HTML files so it's easier to read. Download it [here](/genhtml_edit.py) and run it in the same folder as the JSON file. You might also want to get this [stylesheet](/style.css) (put in same folder as html files) to make things look a little nicer.
 
 ### For mobile users
 
