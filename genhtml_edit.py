@@ -1,4 +1,3 @@
-import sys
 import json
 import html
 import tkinter as tk
@@ -31,7 +30,7 @@ def get_load_path(dir, title, types):
         filetypes=types
     )
     root.destroy()
-    if (path != "" and path != None):
+    if path != "" and path is not None:
         return path
     else:
         return None
@@ -42,16 +41,16 @@ input("\nWelcome to the AIDCAT HTML Generator!\n\
 First we'll ask for your Adventure file, press Enter to continue...")
 
 # Ask for JSON file
-while (not adventure_path_ok):
+while not adventure_path_ok:
     path = get_load_path(getcwd(), "Select Adventures File", [("Json", "*.json")])
-    if (not path):
+    if not path:
         cont = input("\nThere was an issue getting your file. Would you like to try again? (y/n)")
-        if (cont.lower() == "n" or cont.lower() == "no"):
+        if cont.lower() == "n" or cont.lower() == "no":
             quit()
     else:
         adventure_path_ok = True
 
-file = file = open(path, "r")
+file = open(path, "r")
 infile = json.load(file)
 
 index = open('index.html', 'w', encoding='utf-8')
@@ -91,7 +90,7 @@ for story in infile:
             escape(story['updatedAt']), nl_escape(story['memory']), nl_escape(story['authorsNote'])))
         html_file.write('<details><summary>Discarded actions</summary>')
         for action in story['undoneWindow']:
-            html_file.write('<span data-type="%s" title="%s">%s</span>' % (
+            html_file.write('<span data-type="%s" title="%s">%s</span>' %(
                 action['type'], escape(action['createdAt']), nl_escape(action['text'])))
             if action != story['undoneWindow'][-1]:
                 html_file.write('<hr>')
@@ -111,7 +110,7 @@ for story in infile:
         html_file.write('</body></html>')
         html_file.close()
     except Exception as e:
-        print('An error occured converting story %s:' % story['title'])
+        print('An error occurred converting story %s:' % story['title'])
         print('%s: %s' % (type(e).__name__, e))
         input("Press enter to dismiss...")
 
@@ -119,27 +118,27 @@ for story in infile:
 do_scenarios = input(
     "\nGreat! The HTML for your Adventures has been generated. Would you like to add your scenarios as well? (y/n)\n")
 
-if (do_scenarios.lower() == "n" or do_scenarios.lower() == "no"):
+if do_scenarios.lower() == "n" or do_scenarios.lower() == "no":
     pass
 else:
     # Ask for Scenarios file    
-    while (not scenario_path_ok):
+    while not scenario_path_ok:
         path = get_load_path(getcwd(), "Select Scenarios File", [("Json", "*.json")])
-        if (not path):
+        if not path:
             cont = input("\nThere was an issue getting your file. Would you like to try again? (y/n)")
-            if (cont.lower() == "n" or cont.lower() == "no"):
+            if cont.lower() == "n" or cont.lower() == "no":
                 quit()
         else:
             scenario_path_ok = True
 
-    file = file = open(path, "r")
+    file = open(path, "r")
     infile = json.load(file)
 
     # Start writing HTML
     index.write('</ul><h2>Scenarios</h2><ul>')
     for scenario in infile:
         try:
-            if 'isOption' not in scenario or scenario['isOption'] != True:
+            if 'isOption' not in scenario or not scenario['isOption']:
                 index.write('<li title="%s"><a href="%s.html">%s</a></li>' % (
                     scenario['createdAt'], scenario['publicId'], escape(scenario['title'])))
             html_file = open('%s.html' % scenario['publicId'], 'w', encoding='utf-8')
@@ -211,4 +210,4 @@ else:
     index.close()
 
 print("\nGreat your HTML file should be ready! Open index.html in the AIDCAT directory to view it!\n")
-input("Press any key to close this application...")
+input("Press Enter to close this application...")
