@@ -50,7 +50,7 @@ while not adventure_path_ok:
     else:
         adventure_path_ok = True
 
-file = open(path, "r")
+file = open(path, "r", encoding='utf-8')
 infile = json.load(file)
 
 index = open('index.html', 'w', encoding='utf-8')
@@ -131,7 +131,7 @@ else:
         else:
             scenario_path_ok = True
 
-    file = open(path, "r")
+    file = open(path, "r", encoding="utf-8")
     infile = json.load(file)
 
     # Start writing HTML
