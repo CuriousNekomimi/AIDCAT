@@ -11,7 +11,7 @@ import sys
 import uuid
 from time import sleep, strftime
 
-aidcat_version = '0.6.2'
+aidcat_version = '0.6.4'
 
 
 class User:
@@ -88,7 +88,7 @@ class User:
             token = User.access_token
         req = urllib.request.Request('https://api.aidungeon.io/graphql',
                                      headers={"x-access-token": token, "content-type": "application/json"})
-        res = urllib.request.urlopen(req, data=json.dumps(query).encode('utf8'))
+        res = urllib.request.urlopen(req, data=json.dumps(query).encode('utf-8'))
         return json.loads(res.read())
     
     # Expects a username, whether or not the data is from a bookmark
@@ -100,7 +100,7 @@ class User:
         else:
             file_name = f'{self.user or "your"}_{content_type}_{time_now}.json'
         
-        with open(file_name, 'x', encoding='utf8') as f:
+        with open(file_name, 'x', encoding='utf-8') as f:
             json.dump(self.content_cache[content_type], f, ensure_ascii=False, indent=8)
         print(f'Saved to {file_name}.')
     
@@ -742,7 +742,7 @@ def our_content_menu():
 # Main menu choices.
 main_menu_choices = [
     "[1] Download your saved content. [Default]",
-    "[2] Download another user's published content.",
+    "[2] <TEMPORARILY DISABLED> Download another user's published content.\n    *Latitude has disabled the ability to save other users' published content.",
     "[3] Change, wipe, or view your access token.",
     "[0] Quit program.\n"
 ]
@@ -764,8 +764,8 @@ def main_menu():
             program_quit()
         elif choice == 1:
             your_content_menu()
-        elif choice == 2:
-            our_content_menu()
+        # elif choice == 2:
+        #     our_content_menu()
         elif choice == 3:
             auth_menu()
         else:
@@ -850,26 +850,56 @@ query ($username: String, $input: SearchInput) {
 fragment ContentCardSearchable on Adventure {
     id
     publicId
+    userId
     title
     description
+    tags
     createdAt
+    publishedAt
     updatedAt
+    deletedAt
+    published
+    isOwner
     type
+    thirdPerson
     score
     memory
     authorsNote
     worldInfo
     score
     isOwner
-
     user {
+        id
         username
+        icon
+        avatar
+        __typename
     }
-
-    actions {
+    actionCount
+    userJoined
+    scenario {
+        id
+        title
+        publicId
+        published
+        deletedAt
+        __typename
+    }
+    __typename
+    isSaved
+    allowComments
+    totalComments
+    userVote
+    totalUpvotes
+    allPlayers {
+        id
+        userId
+        characterName
+        __typename
+    }
+    actionWindow {
         ...ActionSubscriptionAction
     }
-
     undoneWindow {
         ...ActionSubscriptionAction
     }
@@ -879,7 +909,12 @@ fragment ActionSubscriptionAction on Action {
     id
     text
     type
+    adventureId
+    decisionId
+    undoneAt
+    deletedAt
     createdAt
+    __typename
 }
 """
 
