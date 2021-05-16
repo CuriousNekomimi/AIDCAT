@@ -11,7 +11,7 @@ import sys
 import uuid
 from time import sleep, strftime
 
-aidcat_version = '0.6.4'
+aidcat_version = '0.6.5'
 
 
 class User:
@@ -897,7 +897,7 @@ fragment ContentCardSearchable on Adventure {
         characterName
         __typename
     }
-    actionWindow {
+    actions {
         ...ActionSubscriptionAction
     }
     undoneWindow {
