@@ -12,7 +12,7 @@ import sys
 import uuid
 from time import sleep, strftime
 
-aidcat_version = '0.6.6'
+aidcat_version = '0.6.7'
 
 
 class User:
@@ -144,8 +144,9 @@ class User:
     
     def get_subscenarios(self):
         try:
+            print(f"Getting at least {len(self.content_cache['scenario_options'])} subscenarios... This may take a while...")
             for pubid in self.content_cache['scenario_options']:
-                print('Getting subscenario %s...' % pubid)
+                # print(f"Getting subscenario {pubid}")
                 self.query_options['variables']['publicId'] = pubid
                 result = User.make_query(self.query_options)
                 
