@@ -4,6 +4,7 @@ Created on May 6, 2021
 @author: Curious Nekomimi
 """
 import json
+import traceback
 import urllib.request
 import urllib.error
 import os
@@ -11,7 +12,7 @@ import sys
 import uuid
 from time import sleep, strftime
 
-aidcat_version = '0.6.5'
+aidcat_version = '0.6.6'
 
 
 class User:
@@ -133,8 +134,7 @@ class User:
                     print('There was no data...')
                     break
         except urllib.error.HTTPError as e:
-            print(e)
-            print(e.read())
+            print(traceback.format_exception(type(e), e, e.__traceback__))
         
         self.get_subscenarios()
         if self.content_cache['scenarios']:
@@ -159,8 +159,7 @@ class User:
                 else:
                     print('There was no data...')
         except urllib.error.HTTPError as e:
-            print(e)
-            print(e.read())
+            print(traceback.format_exception(type(e), e, e.__traceback__))
         self.content_cache['scenario_options'] = []
     
     def get_adventures(self, is_saved=False):
@@ -187,8 +186,7 @@ class User:
                     print('There was no data...')
                     break
         except urllib.error.HTTPError as e:
-            print(e)
-            print(e.read())
+            print(traceback.format_exception(type(e), e, e.__traceback__))
         if self.content_cache['adventures']:
             self.save_json('adventures', is_saved)
         else:
@@ -238,8 +236,7 @@ class User:
             else:
                 print('No worlds to save!')
         except urllib.error.HTTPError as e:
-            print(e)
-            print(e.read())
+            print(traceback.format_exception(type(e), e, e.__traceback__))
     
     def get_social(self):
         self.content_cache['friends'] = []
@@ -260,8 +257,7 @@ class User:
             else:
                 print('There was no data...')
         except urllib.error.HTTPError as e:
-            print(e)
-            print(e.read())
+            print(traceback.format_exception(type(e), e, e.__traceback__))
         
         if self.content_cache['friends']:
             self.save_json('friends')
@@ -439,9 +435,17 @@ menu_header_auth_menu = """
 ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝    ╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝"""[1:]
 
 
-# Tries to clear the user's screen. Skips on exception.
+# Tries to clear the user's screen.
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
+
+
+# Tries to set the current working directory. Skips on exception.
+def set_directory():
+    try:
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    except Exception as e:
+        print(traceback.format_exception(type(e), e, e.__traceback__))
 
 
 def pause():
@@ -485,7 +489,7 @@ class Token:
         except IOError:
             print('Saved token not found...')
         except ValueError as e:
-            print(e)
+            print(traceback.format_exception(type(e), e, e.__traceback__))
         
         return None
 
@@ -508,7 +512,8 @@ class Token:
                     Token.save(token)
                 return token
             except ValueError as e:
-                print(e, 'Please try again.')
+                print(traceback.format_exception(type(e), e, e.__traceback__))
+                print('Please try again.')
                 pause()
     
     # Save's the user's x-access-token to 'access_token.txt'.
@@ -519,8 +524,9 @@ class Token:
             with open('access_token.txt', 'w') as f:
                 f.write(token)
             print("Token saved to 'access_token.txt'.")
-        except IOError:
+        except IOError as e:
             print('Something went wrong saving your access token.')
+            print(traceback.format_exception(type(e), e, e.__traceback__))
         pause()
 
     # Retrieves the account username associated with a token. Returns None for an invalid token.
@@ -650,15 +656,17 @@ def your_content_menu():
             content_type = content_types[choice - 1]
             try:
                 action()
-            except Exception:
+            except Exception as e:
                 print(f'An error occurred saving your {content_type}.')
+                print(traceback.format_exception(type(e), e, e.__traceback__))
         
         elif choice == 7:
             for action, content_type in zip(actions, content_types):
                 try:
                     action()
-                except Exception:
+                except Exception as e:
                     print(f'An error occurred saving your {content_type}.')
+                    print(traceback.format_exception(type(e), e, e.__traceback__))
         
         else:
             print(f'ERR: Input must be an integer from 0 to {num_choices}. Try again!')
@@ -715,21 +723,24 @@ def our_content_menu():
             content_type = content_types[choice - 1]
             try:
                 action()
-            except Exception:
+            except Exception as e:
                 print(f"An error occurred saving {target_username}'s {content_type}.")
+                print(traceback.format_exception(type(e), e, e.__traceback__))
         
         elif choice == 5:
             for action, content_type in zip(actions, content_types):
                 try:
                     action()
-                except Exception:
+                except Exception as e:
                     print(f"An error occurred saving {target_username}'s {content_type}.")
+                    print(traceback.format_exception(type(e), e, e.__traceback__))
         
         elif choice == 6:
             try:
                 target_username = input("Target user's AI Dungeon username: ")
-            except Exception:
+            except Exception as e:
                 print('An error occurred setting the target user.')
+                print(traceback.format_exception(type(e), e, e.__traceback__))
         
         else:
             print(f'ERR: Input must be an integer from 0 to {num_choices}. Try again!')
@@ -742,7 +753,8 @@ def our_content_menu():
 # Main menu choices.
 main_menu_choices = [
     "[1] Download your saved content. [Default]",
-    "[2] <TEMPORARILY DISABLED> Download another user's published content.\n    *Latitude has disabled the ability to save other users' published content.",
+    "[2] <TEMPORARILY DISABLED> Download another user's published content.\n\
+    *Latitude disabled the ability to save other users' published content.",
     "[3] Change, wipe, or view your access token.",
     "[0] Quit program.\n"
 ]
@@ -775,6 +787,9 @@ def main_menu():
 
 def main():
     try:
+        # Set the working directory to the one this file is running out of.
+        # This ensures that saved files appear in the directory with aidcat.py.
+        set_directory()
         clear_screen()
         print(screen_flash)
         pause()
