@@ -150,7 +150,7 @@ class User:
                 self.query_options['variables']['publicId'] = pubid
                 result = User.make_query(self.query_options)
                 
-                if 'data' in result and 'scenario' in result['data']:
+                if 'data' in result and 'scenario' in result['data'] and result['data']['scenario'] is not None:
                     result['data']['scenario']['isOption'] = True
                     self.content_cache['scenarios'].append(result['data']['scenario'])
                     if 'options' in result['data']['scenario'] and \
