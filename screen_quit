@@ -1,0 +1,24 @@
+████████╗██╗  ██╗ █████╗ ███╗   ██╗██╗  ██╗    ██╗   ██╗ ██████╗ ██╗   ██╗██╗
+╚══██╔══╝██║  ██║██╔══██╗████╗  ██║██║ ██╔╝    ╚██╗ ██╔╝██╔═══██╗██║   ██║██║
+   ██║   ███████║███████║██╔██╗ ██║█████╔╝      ╚████╔╝ ██║   ██║██║   ██║██║
+   ██║   ██╔══██║██╔══██║██║╚██╗██║██╔═██╗       ╚██╔╝  ██║   ██║██║   ██║╚═╝
+   ██║   ██║  ██║██║  ██║██║ ╚████║██║  ██╗       ██║   ╚██████╔╝╚██████╔╝██╗
+   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝       ╚═╝    ╚═════╝  ╚═════╝ ╚═╝
+
+...for using the AI Dungeon Content Archive Toolkit (AID CAT) v"""[1:]+aidcat_version+"""!
+
+...to an anonymous anon who wishes to remain anonymous for:
+    The original script and giving me the inspiration to create AID CAT.
+
+...to Eta for:
+    Helping me with code refactoring and suggestions that improved efficiency
+    and neatness. *happy perfectionist noises*
+
+Github repository:
+    https://github.com/CuriousNekomimi/AIDCAT
+
+Report issues here:
+    https://github.com/CuriousNekomimi/AIDCAT/issues
+
+License:
+    https://github.com/CuriousNekomimi/AIDCAT/blob/main/LICENSE
