@@ -637,3 +637,6 @@ class Token():
 # Tries to clear the user's screen. Skips on exception.
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
+
+def pause():
+    input('\nPress Enter to continue...')

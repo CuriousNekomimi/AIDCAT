@@ -2,7 +2,7 @@ import sys
 import os
 from time import sleep
 
-from aidcat import User, Token, clear_screen
+from aidcat import User, Token, clear_screen, pause
 
 menu_header = '\nAvailable operations:\n'
 
@@ -37,9 +37,6 @@ main_menu_choices = [
 def load_media(file_name):
     with open(file_name) as file: 
         return file.read().strip()
-
-def pause():
-    input('\nPress Enter to continue...')
 
 # Close the program.
 def program_quit():
