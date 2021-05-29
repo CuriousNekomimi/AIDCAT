@@ -42,7 +42,7 @@ Instructions below copied with edits from original script author's site (referen
 
 Recently, [Latitude](https://latitude.io/blog/update-to-our-community-ai-test-april-2021/) has announced changes that will end AI cooms as we know them today. Going beyond just the explore page, employees may now ban you for content in your unpublished stories. For this reason, I have programmed a script that can automatically download all of the stories and scenarios in your account. Here are the instructions:
 
-1. Before you can use the script, you must download and install the [Python 3 runtime](https://www.python.org/downloads/).
+1. Before you can use the script, you must download and install the [Python 3 runtime](https://www.python.org/downloads/). **Make sure to select "Add Python 3.X to PATH" on the first page of the installer.**
 2. The script needs your access token so it can access your private stories. The token will only be used for that purpose, and it will not be stored. See how to access it in [Firefox](/firefox.webm) or [Chrome](/chrome.webm).
 3. Download the aidcat.py script [here](https://github.com/CuriousNekomimi/AIDCAT/releases). Move it to where you want your stories saved and run it. (usually by double-clicking, or typing `python aidcat.py` or `python3 aidcat.py` in the command prompt while in the directory containing the script file).
 4. Enter your login token and press enter. While you wait, think back to the good times you had with your fictional friends.
