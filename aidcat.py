@@ -4,6 +4,7 @@ Created on May 6, 2021
 @author: Curious Nekomimi
 """
 import json
+import string
 import traceback
 import urllib.request
 import urllib.error
@@ -11,20 +12,21 @@ import os
 import sys
 import uuid
 from time import sleep, strftime
+from random import randint, choice
 
-aidcat_version = '0.6.7'
+aidcat_version = '0.6.9'
 
 
 class User:
     access_token = None
-    
+
     def __init__(self, user=''):
         self.user = user
         self.content_cache = {
             'adventures': [], 'scenarios': [], 'scenario_options': [], 'worlds': [],
             'posts': [], 'friends': [], 'followers': [], 'following': []
         }
-        
+
         self.query_scenarios = {
             "variables": {
                 "input": {
@@ -82,7 +84,67 @@ class User:
             },
             "query": User.social_query_string
         }
-    
+        self.query_obfuscate_actions = {
+            "variables": {
+                "input": {
+                    "actionId": "",
+                    "publicId": "",
+                    "text": "FUCK LATITUDE!"
+                }
+            },
+            "query": User.actions_obfuscate_string
+        }
+
+        self.query_obfuscate_adventures = {
+            "variables": {
+                "input": {
+                    "description": "",
+                    "publicId": "",
+                    "tags": [],
+                    "title": "",
+                }
+            },
+            "query": User.adventures_obfuscate_string
+        }
+
+        self.query_obfuscate_memory = {
+            "variables": {
+                "input": {
+                    "authorsNote": "",
+                    "memory": "",
+                    "publicId": ""
+                }
+            },
+            "query": User.memory_obfuscate_string
+        }
+
+        self.query_obfuscate_world_info = {
+            "variables": {
+                "input": {
+                    "attributes": {
+                        "description": None,
+                        "name": None
+                    },
+                    "description": None,
+                    "entry": "",
+                    # "generator": "Manual",
+                    # "hidden": False,
+                    "id": "",
+                    "keys": "",
+                    "name": None,
+                    # "type": ""
+                }
+            },
+            "query": User.obfuscate_world_info_string
+        }
+
+        self.query_delete_adventure = {
+            "variables": {
+                "publicId": ""
+            },
+            "query": User.adventures_delete_string
+        }
+
     @staticmethod
     def make_query(query, token=None):
         if token is None:
@@ -91,7 +153,7 @@ class User:
                                      headers={"x-access-token": token, "content-type": "application/json"})
         res = urllib.request.urlopen(req, data=json.dumps(query).encode('utf-8'))
         return json.loads(res.read())
-    
+
     # Expects a username, whether or not the data is from a bookmark
     def save_json(self, content_type, is_saved=False):
         # Current local time in ISO 8601 format.
@@ -100,11 +162,11 @@ class User:
             file_name = f'{self.user or "your"}_saved_{content_type}_{time_now}.json'
         else:
             file_name = f'{self.user or "your"}_{content_type}_{time_now}.json'
-        
+
         with open(file_name, 'x', encoding='utf-8') as f:
             json.dump(self.content_cache[content_type], f, ensure_ascii=False, indent=8)
         print(f'Saved to {file_name}.')
-    
+
     def get_scenarios(self, is_saved=False):
         self.content_cache['scenarios'] = []
         self.content_cache['scenario_options'] = []
@@ -117,7 +179,7 @@ class User:
         try:
             while True:
                 result = User.make_query(self.query_scenarios)
-                
+
                 if 'data' in result:
                     if result['data']['user']['search']:
                         self.content_cache['scenarios'] += result['data']['user']['search']
@@ -135,13 +197,13 @@ class User:
                     break
         except urllib.error.HTTPError as e:
             print(traceback.format_exception(type(e), e, e.__traceback__))
-        
+
         self.get_subscenarios()
         if self.content_cache['scenarios']:
             self.save_json('scenarios', is_saved)
         else:
             print('No scenarios to save!')
-    
+
     def get_subscenarios(self):
         try:
             print(f"Getting at least {len(self.content_cache['scenario_options'])} subscenarios... This may take a while...")
@@ -149,7 +211,7 @@ class User:
                 # print(f"Getting subscenario {pubid}")
                 self.query_options['variables']['publicId'] = pubid
                 result = User.make_query(self.query_options)
-                
+
                 if 'data' in result and 'scenario' in result['data'] and result['data']['scenario'] is not None:
                     result['data']['scenario']['isOption'] = True
                     self.content_cache['scenarios'].append(result['data']['scenario'])
@@ -162,7 +224,7 @@ class User:
         except urllib.error.HTTPError as e:
             print(traceback.format_exception(type(e), e, e.__traceback__))
         self.content_cache['scenario_options'] = []
-    
+
     def get_adventures(self, is_saved=False):
         self.content_cache['adventures'] = []
         if not is_saved:
@@ -174,7 +236,7 @@ class User:
         try:
             while True:
                 result = User.make_query(self.query_adventures)
-                
+
                 if 'data' in result:
                     if result['data']['user']['search']:
                         self.content_cache['adventures'] += result['data']['user']['search']
@@ -192,7 +254,7 @@ class User:
             self.save_json('adventures', is_saved)
         else:
             print('No adventures to save!')
-    
+
     def get_posts(self, is_saved=False):
         self.content_cache['posts'] = []
         if not is_saved:
@@ -203,7 +265,7 @@ class User:
         self.query_posts['variables']['input']['offset'] = 0
         while True:
             result = User.make_query(self.query_posts)
-            
+
             if 'data' in result:
                 if result['data']['user']['search']:
                     self.content_cache['posts'] += result['data']['user']['search']
@@ -215,39 +277,39 @@ class User:
             else:
                 print('There was no data...')
                 break
-        
+
         if self.content_cache['posts']:
             self.save_json('posts', is_saved)
         else:
             print('No posts to save!')
-    
+
     def get_worlds(self):
         self.content_cache['worlds'] = []
         print('Getting worlds...')
         try:
             result = User.make_query(self.query_worlds)
-            
+
             if 'data' in result:
                 self.content_cache['worlds'] = result['data']['worlds']
             else:
                 print('There was no data...')
-            
+
             if self.content_cache['worlds']:
                 self.save_json('worlds')
             else:
                 print('No worlds to save!')
         except urllib.error.HTTPError as e:
             print(traceback.format_exception(type(e), e, e.__traceback__))
-    
+
     def get_social(self):
         self.content_cache['friends'] = []
         self.content_cache['followers'] = []
         self.content_cache['following'] = []
         print('Getting friends, followers, and following...')
-        
+
         try:
             result = User.make_query(self.query_social)
-            
+
             if 'data' in result:
                 if 'friends' in result['data']['user']:
                     self.content_cache['friends'] = result['data']['user']['friends']
@@ -259,27 +321,127 @@ class User:
                 print('There was no data...')
         except urllib.error.HTTPError as e:
             print(traceback.format_exception(type(e), e, e.__traceback__))
-        
+
         if self.content_cache['friends']:
             self.save_json('friends')
         else:
             print('No friends to save!')
-        
+
         if self.content_cache['followers']:
             self.save_json('followers')
         else:
             print('No followers to save!')
-        
+
         if self.content_cache['following']:
             self.save_json('following')
         else:
             print('No following to save!')
-    
+
     def get_saves(self):
         self.get_scenarios(True)
         self.get_adventures(True)
         self.get_posts(True)
 
+    def obfuscate_adventures(self, is_saved=False):
+        self.content_cache['adventures'] = []
+        if not is_saved:
+            print('Getting adventures...')
+        else:
+            print('Getting saved adventures...')
+        self.query_adventures['variables']['input']['saved'] = is_saved
+        self.query_adventures['variables']['input']['offset'] = 0
+        try:
+            while True:
+                result = User.make_query(self.query_adventures)
+                if 'data' in result:
+                    if result['data']['user']['search']:
+                        self.content_cache['adventures'] += result['data']['user']['search']
+                        print('Got %d adventures...' % len(self.content_cache['adventures']))
+                        self.query_adventures['variables']['input']['offset'] = len(self.content_cache['adventures'])
+                    else:
+                        print('No more adventures found.')
+                        break
+                else:
+                    print('There was no data...')
+                    break
+
+        except urllib.error.HTTPError as e:
+            print(traceback.format_exception(type(e), e, e.__traceback__))
+        try:
+            message = string.printable
+            if self.content_cache['adventures']:
+                for adventure in self.content_cache['adventures']:
+                    print(f"Wiping {adventure['publicId']}'s title and description")
+                    self.query_obfuscate_adventures['variables']['input']['publicId'] = adventure['publicId']
+                    self.query_obfuscate_adventures['variables']['input']['title'] = ''.join(choice(message) for i in range(10,70))
+                    self.query_obfuscate_adventures['variables']['input']['description'] = ''.join(choice(message) for i in range(100,400))
+                    User.make_query(self.query_obfuscate_adventures)
+                    # sleep_time = 1 # randint(1, 3)
+                    # print(f"Waiting {sleep_time} seconds...")
+                    # sleep(sleep_time)
+                    print(f"Wiping {adventure['publicId']}'s authorsNote and memory...")
+                    self.query_obfuscate_memory['variables']['input']['publicId'] = adventure['publicId']
+                    self.query_obfuscate_memory['variables']['input']['authorsNote'] = ''.join(choice(message) for i in range(75,150))
+                    self.query_obfuscate_memory['variables']['input']['memory'] = ''.join(choice(message) for i in range(250,1000))
+                    User.make_query(self.query_obfuscate_memory)
+                    # sleep_time = 1 # randint(1, 3)
+                    # print(f"Waiting {sleep_time} seconds...")
+                    # sleep(sleep_time)
+
+                    self.query_obfuscate_actions['variables']['input']['publicId'] = adventure['publicId']
+                    if adventure['actions']:
+                        for action in adventure['actions']:
+                            print(f"Obfuscating action: {action['id']}")
+                            self.query_obfuscate_actions['variables']['input']['actionId'] = action['id']
+                            self.query_obfuscate_actions['variables']['input']['text'] = \
+                                ''.join(choice(message) for i in range(100,200))
+                            User.make_query(self.query_obfuscate_actions)
+                            # sleep_time = 1 # randint(1,3)
+                            # print(f"Waiting {sleep_time} seconds...")
+                            # sleep(sleep_time)
+
+                    if adventure['undoneWindow']:
+                        for action in adventure['undoneWindow']:
+                            print(f"Obfuscating undone action: {action['id']}")
+                            self.query_obfuscate_actions['variables']['input']['actionId'] = action['id']
+                            self.query_obfuscate_actions['variables']['input']['text'] = \
+                                ''.join(choice(message) for i in range(100,200))
+                            User.make_query(self.query_obfuscate_actions)
+                            # sleep_time = 1 # randint(1, 3)
+                            # print(f"Waiting {sleep_time} seconds...")
+                            # sleep(sleep_time)
+
+                    if adventure['worldInfo']:
+                        for entry in adventure['worldInfo']:
+                            if 'worldInfoId' in entry:
+                                print(f"Obfuscating world info: {entry['worldInfoId']}")
+                                self.query_obfuscate_world_info['variables']['input']['id'] = entry['worldInfoId']
+                            elif 'id' in entry:
+                                print(f"Obfuscating world info: {entry['id']}")
+                                self.query_obfuscate_world_info['variables']['input']['id'] = entry['id']
+                            else:
+                                print("Latitude messed up backwards compatibility with this adventure's world info. Unable to obfuscate.")
+                                # self.query_obfuscate_adventures['variables']['input']['worldInfo'] = [{}]
+                                # User.make_query(self.query_obfuscate_adventures)
+                                # print("World info orphaned successfully!")
+                                continue
+                            self.query_obfuscate_world_info['variables']['input']['entry'] = \
+                                ''.join(choice(message) for i in range(50, 100))
+                            self.query_obfuscate_world_info['variables']['input']['keys'] = \
+                                ''.join(choice(message) for i in range(10, 20))
+                            User.make_query(self.query_obfuscate_world_info)
+                            # sleep_time = 1 # randint(1, 3)
+                            # print(f"Waiting {sleep_time} seconds...")
+                            # sleep(sleep_time)
+                    print(f"Deleting adventure {adventure['publicId']}!\nRemember to empty your trash in-game!")
+                    self.query_delete_adventure['variables']['publicId'] = adventure['publicId']
+                    User.make_query(self.query_delete_adventure)
+                print('Done obfuscating your adventures!\nRemember to empty your trash in-game!')
+        except urllib.error.HTTPError as e:
+            print(traceback.format_exception(type(e), e, e.__traceback__))
+
+        else:
+                print('No more adventures to obfuscate!')
 
 screen_flash = """
  ▄▄▄       ██▓   ▓█████▄  █    ██  ███▄    █   ▄████ ▓█████  ▒█████   ███▄    █
@@ -361,6 +523,24 @@ Report issues here:
 License:
     https://github.com/CuriousNekomimi/AIDCAT/blob/main/LICENSE"""
 
+info_block = r"""
+
+Remember what they took from you*
+
+    A living archive of Latitude's recent actions.
+    Source: https://rentry.co/remember-what-they-took-from-you
+
+AuroraPurgatio**
+    
+    The fine-tuning data Latitude selected to train AI Dungeon includes graphic
+    fictional portrayals of imaginary characters, both minors, and adults, in sexual,
+    violent, offensive, discriminatory, and non-consensual situations.
+    Source: https://gitgud.io/AuroraPurgatio/aurorapurgatio
+    
+* May contain links to NSFW official Latitude content.
+** Contains NSFW official Latitude content.
+"""[1:]
+
 # *hugs* Nya!
 screen_surprise = r"""
                                    ,╓▄▄▄▄▄▄▄▄▄▄▄▄▄╓,         ,╓▄▄▄▒▓▓▓▓▓▓▓▓▓▄,
@@ -400,6 +580,62 @@ m ,         .,,              ,|▄▄▓██████▓▓▓▒▄▄▄,
 █▓∩   ..,(▒█▌  └M  └╙▀▀██████╩.    ,||||||||||||└╙╙╙∩||||||||||||||{│││∩██▓╚│││╠
 ▀██▒▄  |#▓██▒,         │∩  ,│∩  ,|||||||||||||||||||└╠MW∩|||||]{{⌠│││││∩╙██M|│││"""[1:]
 
+screen_walton = r"""
+          ██▀███ ▓█████ ███▄ ▄███▓█████ ███▄ ▄███▓▄▄▄▄  ▓█████ ██▀███
+         ▓██ ▒ ██▓█   ▀▓██▒▀█▀ ██▓█   ▀▓██▒▀█▀ ██▓█████▄▓█   ▀▓██ ▒ ██▒
+         ▓██ ░▄█ ▒███  ▓██    ▓██▒███  ▓██    ▓██▒██▒ ▄█▒███  ▓██ ░▄█ ▒
+         ▒██▀▀█▄ ▒▓█  ▄▒██    ▒██▒▓█  ▄▒██    ▒██▒██░█▀ ▒▓█  ▄▒██▀▀█▄
+         ░██▓ ▒██░▒████▒██▒   ░██░▒████▒██▒   ░██░▓█  ▀█░▒████░██▓ ▒██▒
+         ░ ▒▓ ░▒▓░░ ▒░ ░ ▒░   ░  ░░ ▒░ ░ ▒░   ░  ░▒▓███▀░░ ▒░ ░ ▒▓ ░▒▓░
+           ░▒ ░ ▒░░ ░  ░  ░      ░░ ░  ░  ░      ▒░▒   ░ ░ ░  ░ ░▒ ░ ▒░
+           ░░   ░   ░  ░      ░     ░  ░      ░   ░    ░   ░    ░░   ░
+            ░       ░  ░      ░     ░  ░      ░   ░        ░  ░  ░
+                                                       ░
+ █     █░██░ ██ ▄▄▄    ▄▄▄█████▓   ██░ ██▓█████   ▄▄▄█████▓▒█████  ▒█████  ██ ▄█▀
+▓█░ █ ░█▓██░ ██▒████▄  ▓  ██▒ ▓▒  ▓██░ ██▓█   ▀   ▓  ██▒ ▓▒██▒  ██▒██▒  ██▒██▄█▒
+▒█░ █ ░█▒██▀▀██▒██  ▀█▄▒ ▓██░ ▒░  ▒██▀▀██▒███     ▒ ▓██░ ▒▒██░  ██▒██░  ██▓███▄░
+░█░ █ ░█░▓█ ░██░██▄▄▄▄█░ ▓██▓ ░   ░▓█ ░██▒▓█  ▄   ░ ▓██▓ ░▒██   ██▒██   ██▓██ █▄
+░░██▒██▓░▓█▒░██▓▓█   ▓██▒▒██▒ ░   ░▓█▒░██░▒████▒    ▒██▒ ░░ ████▓▒░ ████▓▒▒██▒ █▄
+░ ▓░▒ ▒  ▒ ░░▒░▒▒▒   ▓▒█░▒ ░░      ▒ ░░▒░░░ ▒░ ░    ▒ ░░  ░ ▒░▒░▒░░ ▒░▒░▒░▒ ▒▒ ▓▒
+  ▒ ░ ░  ▒ ░▒░ ░ ▒   ▒▒ ░  ░       ▒ ░▒░ ░░ ░  ░      ░     ░ ▒ ▒░  ░ ▒ ▒░░ ░▒ ▒░
+  ░   ░  ░  ░░ ░ ░   ▒   ░         ░  ░░ ░  ░       ░     ░ ░ ░ ▒ ░ ░ ░ ▒ ░ ░░ ░
+    ░    ░  ░  ░     ░  ░          ░  ░  ░  ░  ░              ░ ░     ░ ░ ░  ░
+
+           ███████▀███  ▒█████  ███▄ ▄███▓   ▓██   ██▓▒█████  █    ██
+         ▓██   ▓██ ▒ ██▒██▒  ██▓██▒▀█▀ ██▒    ▒██  ██▒██▒  ██▒██  ▓██▒
+         ▒████ ▓██ ░▄█ ▒██░  ██▓██    ▓██░     ▒██ ██▒██░  ██▓██  ▒██░
+         ░▓█▒  ▒██▀▀█▄ ▒██   ██▒██    ▒██      ░ ▐██▓▒██   ██▓▓█  ░██░
+         ░▒█░  ░██▓ ▒██░ ████▓▒▒██▒   ░██▒     ░ ██▒▓░ ████▓▒▒▒█████▓
+          ▒ ░  ░ ▒▓ ░▒▓░ ▒░▒░▒░░ ▒░   ░  ░      ██▒▒▒░ ▒░▒░▒░░▒▓▒ ▒ ▒
+          ░      ░▒ ░ ▒░ ░ ▒ ▒░░  ░      ░    ▓██ ░▒░  ░ ▒ ▒░░░▒░ ░ ░
+          ░ ░    ░░   ░░ ░ ░ ▒ ░      ░       ▒ ▒ ░░ ░ ░ ░ ▒  ░░░ ░ ░
+                  ░        ░ ░        ░       ░ ░        ░ ░    ░
+                                              ░ ░                                     
+"""[1:]
+
+take_a_stand_text = """
+                ██╗    ██╗ █████╗ ██████╗ ███╗   ██╗██╗███╗   ██╗ ██████╗ ██╗             
+                ██║    ██║██╔══██╗██╔══██╗████╗  ██║██║████╗  ██║██╔════╝ ██║             
+                ██║ █╗ ██║███████║██████╔╝██╔██╗ ██║██║██╔██╗ ██║██║  ███╗██║             
+                ██║███╗██║██╔══██║██╔══██╗██║╚██╗██║██║██║╚██╗██║██║   ██║╚═╝             
+                ╚███╔███╔╝██║  ██║██║  ██║██║ ╚████║██║██║ ╚████║╚██████╔╝██╗             
+                 ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝             
+
+WARNING THIS CANNOT BE UNDONE! PROCEED WITH CAUTION!
+
+This will overwrite ALL your adventures and associated world info with junk data,
+making them unreadable and useless to Latitude.
+
+Latitude doesn't value privacy and might suspend your account for doing this.
+
+Only continue if you have saved your content and are ready to delete your account.
+
+If you're not ready to wipe your adventures, press Enter to return to the My Stuff menu.
+
+To take a stand, type "my privacy matters" without quotes and press Enter to proceed.
+
+Are you ready to take a stand? > """
+
 # Headers for menus.
 menu_header = '\nAvailable operations:\n'
 
@@ -434,6 +670,14 @@ menu_header_auth_menu = """
 ██╔══██║██║   ██║   ██║   ██╔══██║    ██║╚██╔╝██║██╔══╝  ██║╚██╗██║██║   ██║
 ██║  ██║╚██████╔╝   ██║   ██║  ██║    ██║ ╚═╝ ██║███████╗██║ ╚████║╚██████╔╝
 ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝    ╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝"""[1:]
+
+menu_header_info_menu = """
+██╗███╗   ██╗███████╗ ██████╗     ███╗   ███╗███████╗███╗   ██╗██╗   ██╗
+██║████╗  ██║██╔════╝██╔═══██╗    ████╗ ████║██╔════╝████╗  ██║██║   ██║
+██║██╔██╗ ██║█████╗  ██║   ██║    ██╔████╔██║█████╗  ██╔██╗ ██║██║   ██║
+██║██║╚██╗██║██╔══╝  ██║   ██║    ██║╚██╔╝██║██╔══╝  ██║╚██╗██║██║   ██║
+██║██║ ╚████║██║     ╚██████╔╝    ██║ ╚═╝ ██║███████╗██║ ╚████║╚██████╔╝
+╚═╝╚═╝  ╚═══╝╚═╝      ╚═════╝     ╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝"""[1:]
 
 
 # Tries to clear the user's screen.
@@ -470,12 +714,12 @@ def program_quit():
 
 class Token:
     # This is an abstract class which groups together static methods for handling x-access-tokens.
-    
+
     # Gets the user's x-access-token. Tries to load from file first, and will prompt the user otherwise.
     @staticmethod
     def get():
         return Token.load() or Token.prompt()
-    
+
     # Loads the user's x-access-token from a file.
     @staticmethod
     def load():
@@ -491,7 +735,7 @@ class Token:
             print('Saved token not found...')
         except ValueError as e:
             print(traceback.format_exception(type(e), e, e.__traceback__))
-        
+
         return None
 
     # Prompts the user for an x-access-token until a valid one is given, and prompts to save the given token.
@@ -516,7 +760,7 @@ class Token:
                 print(traceback.format_exception(type(e), e, e.__traceback__))
                 print('Please try again.')
                 pause()
-    
+
     # Save's the user's x-access-token to 'access_token.txt'.
     @staticmethod
     def save(token):
@@ -548,7 +792,7 @@ class Token:
             raise ValueError("Invalid token format detected. Should be a valid UUID.")
         if Token.user(token) is None:
             raise ValueError("Invalid token detected. The token provided is not associated with any account.")
-        
+
         return token
 
 
@@ -578,20 +822,20 @@ def auth_menu():
             choice = int(input(f'Operation [0-{num_choices}]: '))
         except ValueError:
             pass
-        
+
         # Return to the main menu.
         if choice == 0:
             break
-        
+
         # Set access_token.
         elif choice == 1:
             # If Token.promp() returns None, don't change the value of User.access_token.
             User.access_token = Token.prompt(can_exit=True) or User.access_token
-        
+
         # Save access_token to file.
         elif choice == 2:
             Token.save(User.access_token)
-        
+
         # Wipe access_token.
         elif choice == 3:
             clear_screen()
@@ -601,17 +845,24 @@ def auth_menu():
             else:
                 print("No access_token.txt exists.")
             pause()
-       
+
         elif choice == 4:
             clear_screen()
             print('WARNING! Never share this token! It grants full control of your AI Dungeon account!',
                   f'\nStored x-access-token: {User.access_token}')
             pause()
-            
+
         else:
             print(f'ERR: Input must be an integer from 0 to {num_choices}. Try again!')
             sleep(1)
 
+# The authorization menu.
+def info_menu():
+    # Set the default menu choice.
+    clear_screen()
+    print(menu_header_info_menu, info_block, sep='\n')
+    # Return to the main menu.
+    input("Press Enter to return to the previous menu.")
 
 your_content_menu_choices = [
     "[1] Download your scenarios.",
@@ -621,6 +872,7 @@ your_content_menu_choices = [
     "[5] Download your friends, followers, and following.",
     "[6] Download your saves (bookmarks).",
     "[7] Download all of the above.",
+    "[8] Obfuscate and move your adventures to Trash.",
     "[0] Return to main menu. [Default]\n"
 ]
 
@@ -628,12 +880,12 @@ your_content_menu_choices = [
 # User content download menu.
 def your_content_menu():
     user = User()
-    
+
     actions = [user.get_scenarios, user.get_adventures, user.get_posts,
                user.get_worlds, user.get_social, user.get_saves]
     content_types = ["scenarios", "adventures", "posts",
-                     "worlds", "friends, followers, and following", "bookmarks", ]
-    
+                     "worlds", "friends, followers, and following", "bookmarks" ]
+
     while True:
         # Set the default menu choice.
         choice = 0
@@ -644,14 +896,14 @@ def your_content_menu():
             choice = int(input(f'Operation [0-{num_choices}]: '))
         except ValueError:
             pass
-        
+
         if choice != 0:
             clear_screen()
-        
+
         # Return to the main menu.
         if choice == 0:
             break
-        
+
         elif 1 <= choice <= 6:
             action = actions[choice - 1]
             content_type = content_types[choice - 1]
@@ -660,7 +912,7 @@ def your_content_menu():
             except Exception as e:
                 print(f'An error occurred saving your {content_type}.')
                 print(traceback.format_exception(type(e), e, e.__traceback__))
-        
+
         elif choice == 7:
             for action, content_type in zip(actions, content_types):
                 try:
@@ -668,12 +920,30 @@ def your_content_menu():
                 except Exception as e:
                     print(f'An error occurred saving your {content_type}.')
                     print(traceback.format_exception(type(e), e, e.__traceback__))
-        
+
+        elif choice == 8:
+            try:
+                if input(take_a_stand_text).lower() == 'my privacy matters':
+                    clear_screen()
+                    for line in screen_walton.split('\n'):
+                        print(line)
+                        sleep(0.05)
+                    for x in range(1, 6):
+                        print(f"Taking a stand in {x}...")
+                        sleep(1)
+                    clear_screen()
+                    user.obfuscate_adventures()
+                else:
+                    print('')
+            except Exception as e:
+                print(f'An error occurred obfuscating your adventures.')
+                print(traceback.format_exception(type(e), e, e.__traceback__))
+
         else:
             print(f'ERR: Input must be an integer from 0 to {num_choices}. Try again!')
             sleep(1)
             continue
-        
+
         pause()
 
 
@@ -699,10 +969,10 @@ def our_content_menu():
         menu_choices = our_content_menu_choices(target_username)
         num_choices = len(menu_choices) - 1
         target_user = User(target_username)
-        
+
         actions = [target_user.get_scenarios, target_user.get_adventures, target_user.get_posts, target_user.get_social]
         content_types = ["scenarios", "adventures", "posts", "friends, followers, and following"]
-        
+
         # Set the default menu choice.
         choice = 0
         clear_screen()
@@ -711,14 +981,14 @@ def our_content_menu():
             choice = int(input(f'Operation [0-{num_choices}]: '))
         except ValueError:
             pass
-        
+
         if choice != 0:
             clear_screen()
-        
+
         # Return to the main menu.
         if choice == 0:
             break
-        
+
         elif 1 <= choice <= 4:
             action = actions[choice - 1]
             content_type = content_types[choice - 1]
@@ -727,7 +997,7 @@ def our_content_menu():
             except Exception as e:
                 print(f"An error occurred saving {target_username}'s {content_type}.")
                 print(traceback.format_exception(type(e), e, e.__traceback__))
-        
+
         elif choice == 5:
             for action, content_type in zip(actions, content_types):
                 try:
@@ -735,28 +1005,29 @@ def our_content_menu():
                 except Exception as e:
                     print(f"An error occurred saving {target_username}'s {content_type}.")
                     print(traceback.format_exception(type(e), e, e.__traceback__))
-        
+
         elif choice == 6:
             try:
                 target_username = input("Target user's AI Dungeon username: ")
             except Exception as e:
                 print('An error occurred setting the target user.')
                 print(traceback.format_exception(type(e), e, e.__traceback__))
-        
+
         else:
             print(f'ERR: Input must be an integer from 0 to {num_choices}. Try again!')
             sleep(1)
             continue
-        
+
         pause()
 
 
 # Main menu choices.
 main_menu_choices = [
-    "[1] Download your saved content. [Default]",
-    "[2] <TEMPORARILY DISABLED> Download another user's published content.\n\
+    "[1] My Stuff [Default]",
+    "[2] Our Stuff <TEMPORARILY DISABLED>\n\
     *Latitude disabled the ability to save other users' published content.",
     "[3] Change, wipe, or view your access token.",
+    "[4] More information on the Latitude scandals.",
     "[0] Quit program.\n"
 ]
 
@@ -781,6 +1052,10 @@ def main_menu():
         #     our_content_menu()
         elif choice == 3:
             auth_menu()
+
+        elif choice == 4:
+            info_menu()
+
         else:
             print(f'ERR: Input must be an integer from 0 to {num_choices}. Try again!')
             sleep(1)
@@ -931,6 +1206,66 @@ fragment ActionSubscriptionAction on Action {
     deletedAt
     createdAt
     __typename
+}
+"""
+
+User.adventures_obfuscate_string = """
+mutation($input: AdventureInput) {
+    updateAdventure(input: $input) {
+        ...AdventureEditAdventure __typename
+    }
+}
+fragment AdventureEditAdventure on Adventure {
+    id publicId allowComments createdAt deletedAt description enableExperimentalFeatures mode musicTheme nsfw playPublicId stats published safeMode tags useStats thirdPerson title updatedAt gameState...DeleteButtonSearchable...ContentOptionsSearchable __typename
+}
+fragment ContentOptionsSearchable on Searchable {
+    id publicId published isOwner tags title userId...on Savable {
+        isSaved __typename
+    }
+    ...on Adventure {
+        userJoined __typename
+    }
+    __typename
+}
+fragment DeleteButtonSearchable on Searchable {
+    id publicId published __typename
+}
+"""
+
+User.actions_obfuscate_string = """
+mutation ($input: AlterInput) {
+    editAction(input: $input) {
+        time
+        message
+        __typename
+    }
+}
+"""
+
+User.memory_obfuscate_string = """
+mutation($input: MemoryInput) {
+    updateAdventureMemory(input: $input) {
+        ...RememberControllerAdventure __typename
+    }
+	}
+fragment RememberControllerAdventure on Adventure {
+    id memory authorsNote __typename
+}
+"""
+
+User.obfuscate_world_info_string = """
+mutation($input: WorldInformationInput) {
+    updateWorldInformation(input: $input) {
+        id name description genre type __typename
+    }
+}
+"""
+
+User.adventures_delete_string = """
+mutation($publicId: String) {
+    deleteAdventure(publicId: $publicId) {
+        id publicId deletedAt __typename
+    }
 }
 """
 
