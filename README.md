@@ -39,6 +39,10 @@ I have also created a script that will turn that JSON file into HTML files so it
 
 You can run these scripts using [Termux](https://termux.com/) (Android) or [Pythonista](https://apps.apple.com/us/app/pythonista-3/id1085978097) (iOS). Since it's difficult to access your login token on a mobile browser, here is a script to help you with that: [login.py](/login.py) (1.1 KiB)
 
+#### Termux Instructions
+1. `pkg update && pkg install python && curl -O https://raw.githubusercontent.com/CuriousNekomimi/AIDCAT/main/aidcat.py && curl -O https://raw.githubusercontent.com/CuriousNekomimi/AIDCAT/main/login.py`
+2. `python login.py` (To get your x-access-token)
+3. `python aidcat.py` (To run AIDCAT)
 ## Changelog
 ```
 2021-05-11: v0.6.7
