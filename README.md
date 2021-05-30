@@ -3,6 +3,8 @@
 AID CAT is a command-line utility that will allow you to download JSON backups of:
  1. Your private and published AI Dungeon scenarios, adventures, posts, bookmarks, worlds, friends, followers, and following.
  2. <TEMPORARILIY DISABLED DUE TO LATITUDE BRICKING PUBLIC QUERIES> Any user's published scenarios, adventures, and posts, as well as their friends, followers, and following.
+ 3. Obfuscate all adventures' titles, descriptions, tags, memory, actions, undone actions, and world info with junk data.
+<br>**WARNING! Obfuscating adventures wipes all adventures on an account and CANNOT BE UNDONE!**
 
 Things AID CAT will **NEVER** do:
  1. Download another user's private content.
@@ -12,28 +14,11 @@ Things AID CAT will **NEVER** do:
 **Saved AI Dungeon games exported using AID CAT can now be imported and played with [KoboldAI](https://github.com/KoboldAI/KoboldAI-Client)!** KoboldAI is a browser front-end for playing with multiple local & remote AI models. KoboldAI supports interact with the AI models via Tensorflow and includes a easy-to-use automated install process. Currently supported models are GPT Neo 1.3B/2.7B, GPT-2 Med/Large/XL, Megatron (via InferKit API) as well as the ability to run your fine-tuned custom GPT-Neo (e.g., Neo-horni) and custom GPT-2 (e.g., CloverEdition) models.
 
 ## [Latest Release](https://github.com/CuriousNekomimi/AIDCAT/releases)
-### 2021-05-11: v0.6.2
+### 2021-05-30: v0.6.9
 ```
-HUGE thanks to Eta for making these improvements and for refactoring the program to be object oriented:
-- The phrase "any key" was changed to "Enter." (Actually waiting for any keypress is significantly more complicated).
-- Option 1 of the auth menu previously said [1] Change your access access token, which was fixed.
-- Added a missing error message on "Our Content" page.
-- PEP 8 compliance:
-  - The header docstring was changed to use """ instead of '''
-  - Fixed whitespace around operators in code and method declarations
-  - Fixed indentation in a couple places
-  - Added whitespace between the # and the start of each comment
-  - Added a newline at the end of the file
-  - Added two lines of whitespace before and after function definitions
-  - (Non-PEP 8) Changed menu choices to all be double quoted strings, for consistency
-- Removed default values from actually-mandatory method parameters like save_json's content_type
-- Separated the long as heck query strings from the rest of the code and moved them to the bottom of the file, just above if __name__ == '__main__', to improve readability
-- Added a User class
-  - This class encompasses the operations make_query (new), save_json, get_scenarios/subscenarios/adventures/posts/worlds/social, and get_saves (new, which calls all of the bookmarked operations together)
-  - It holds the fields content_cache, and each of the query_s as instance variables (no longer global)
-    - This means these can be maintained independently per user, which will help a lot with the batch download feature later on (it allows that to be multithreaded, for example)
-- All of the menu code was changed to use User objects representing different users instead of passing around a username parameter
-- The menu code was additionally refactored to cut down on duplicated code by a lot
+Added the ability to obfuscate all adventures' title, description, tags, memory, actions, undone actions, and world info with junk data.
+**WARNING! Obfuscating adventures wipes all adventures on an account and CANNOT BE UNDONE!**
+Added an info page to sources documenting Latitude.
 ```
 Instructions below copied with edits from original script author's site (referenced files uploaded here for archival purposes):
 
@@ -56,6 +41,28 @@ You can run these scripts using [Termux](https://termux.com/) (Android) or [Pyth
 
 ## Changelog
 ```
+2021-05-11: v0.6.7
+ HUGE thanks to Eta for making these improvements and for refactoring the program to be object oriented:
+- The phrase "any key" was changed to "Enter." (Actually waiting for any keypress is significantly more complicated).
+- Option 1 of the auth menu previously said [1] Change your access access token, which was fixed.
+- Added a missing error message on "Our Content" page.
+- PEP 8 compliance:
+  - The header docstring was changed to use """ instead of '''
+  - Fixed whitespace around operators in code and method declarations
+  - Fixed indentation in a couple places
+  - Added whitespace between the # and the start of each comment
+  - Added a newline at the end of the file
+  - Added two lines of whitespace before and after function definitions
+  - (Non-PEP 8) Changed menu choices to all be double quoted strings, for consistency
+- Removed default values from actually-mandatory method parameters like save_json's content_type
+- Separated the long as heck query strings from the rest of the code and moved them to the bottom of the file, just above if __name__ == '__main__', to improve readability
+- Added a User class
+  - This class encompasses the operations make_query (new), save_json, get_scenarios/subscenarios/adventures/posts/worlds/social, and get_saves (new, which calls all of the bookmarked operations together)
+  - It holds the fields content_cache, and each of the query_s as instance variables (no longer global)
+    - This means these can be maintained independently per user, which will help a lot with the batch download feature later on (it allows that to be multithreaded, for example)
+- All of the menu code was changed to use User objects representing different users instead of passing around a username parameter
+- The menu code was additionally refactored to cut down on duplicated code by a lot
+
 2021-05-10: v0.5.7
 Thanks to Eta for these suggestions:
 UUID (access token) validation using python's built-in uuid library.
