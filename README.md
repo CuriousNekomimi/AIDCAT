@@ -14,11 +14,12 @@ Things AID CAT will **NEVER** do:
 **Saved AI Dungeon games exported using AID CAT can now be imported and played with [KoboldAI](https://github.com/KoboldAI/KoboldAI-Client)!** KoboldAI is a browser front-end for playing with multiple local & remote AI models. KoboldAI supports interact with the AI models via Tensorflow and includes a easy-to-use automated install process. Currently supported models are GPT Neo 1.3B/2.7B, GPT-2 Med/Large/XL, Megatron (via InferKit API) as well as the ability to run your fine-tuned custom GPT-Neo (e.g., Neo-horni) and custom GPT-2 (e.g., CloverEdition) models.
 
 ## [Latest Release](https://github.com/CuriousNekomimi/AIDCAT/releases)
-### 2021-05-30: v0.6.9
+### 2021-06-10: v0.7.0
 ```
-Added the ability to obfuscate all adventures' title, description, tags, memory, actions, undone actions, and world info with junk data.
+Added the ability to disable Safe Mode
+Hardened the obfuscation script against network instability
+Optimized the obfuscation script to run faster
 **WARNING! Obfuscating adventures wipes all adventures on an account and CANNOT BE UNDONE!**
-Added an info page to sources documenting Latitude.
 ```
 Instructions below copied with edits from original script author's site (referenced files uploaded here for archival purposes):
 
@@ -45,8 +46,13 @@ You can run these scripts using [Termux](https://termux.com/) (Android) or [Pyth
 3. `python aidcat.py` (To run AIDCAT)
 ## Changelog
 ```
+2021-05-30: v0.6.9
+Added the ability to obfuscate all adventures' title, description, tags, memory, actions, undone actions, and world info with junk data.
+**WARNING! Obfuscating adventures wipes all adventures on an account and CANNOT BE UNDONE!**
+Added an info page to sources documenting Latitude.
+ 
 2021-05-11: v0.6.7
- HUGE thanks to Eta for making these improvements and for refactoring the program to be object oriented:
+HUGE thanks to Eta for making these improvements and for refactoring the program to be object oriented:
 - The phrase "any key" was changed to "Enter." (Actually waiting for any keypress is significantly more complicated).
 - Option 1 of the auth menu previously said [1] Change your access access token, which was fixed.
 - Added a missing error message on "Our Content" page.
