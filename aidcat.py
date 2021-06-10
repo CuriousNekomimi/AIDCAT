@@ -1,6 +1,8 @@
 """
 Created on May 6, 2021
 
+Updated on June 10, 2021
+
 @author: Curious Nekomimi
 """
 import json
@@ -14,7 +16,7 @@ import uuid
 from time import sleep, strftime
 from random import randint, choice
 
-aidcat_version = '0.6.9'
+aidcat_version = '0.7.0'
 
 
 class User:
@@ -145,6 +147,16 @@ class User:
             "query": User.adventures_delete_string
         }
 
+        self.mutator_safe_mode = {
+            "variables": {
+                "input": {
+                    "nsfwGeneration": True,
+                    "unrestrictedInput": True
+                }
+            },
+            "query": User.mutator_safe_mode_string
+        }
+
     @staticmethod
     def make_query(query, token=None):
         if token is None:
@@ -153,6 +165,15 @@ class User:
                                      headers={"x-access-token": token, "content-type": "application/json"})
         res = urllib.request.urlopen(req, data=json.dumps(query).encode('utf-8'))
         return json.loads(res.read())
+
+    # Faster method for mutators. Doesn't store any info.
+    @staticmethod
+    def make_mutator(mutator, token=None):
+        if token is None:
+            token = User.access_token
+        req = urllib.request.Request('https://api.aidungeon.io/graphql',
+                                     headers={"x-access-token": token, "content-type": "application/json"})
+        urllib.request.urlopen(req, data=json.dumps(mutator).encode('utf-8'))
 
     # Expects a username, whether or not the data is from a bookmark
     def save_json(self, content_type, is_saved=False):
@@ -350,9 +371,16 @@ class User:
             print('Getting saved adventures...')
         self.query_adventures['variables']['input']['saved'] = is_saved
         self.query_adventures['variables']['input']['offset'] = 0
+
+        # Get Adventures
         try:
             while True:
-                result = User.make_query(self.query_adventures)
+                while True:
+                    try:
+                        result = User.make_query(self.query_adventures)
+                    except:
+                        continue
+                    break
                 if 'data' in result:
                     if result['data']['user']['search']:
                         self.content_cache['adventures'] += result['data']['user']['search']
@@ -367,6 +395,7 @@ class User:
 
         except urllib.error.HTTPError as e:
             print(traceback.format_exception(type(e), e, e.__traceback__))
+
         try:
             message = string.printable
             if self.content_cache['adventures']:
@@ -375,7 +404,7 @@ class User:
                     self.query_obfuscate_adventures['variables']['input']['publicId'] = adventure['publicId']
                     self.query_obfuscate_adventures['variables']['input']['title'] = ''.join(choice(message) for i in range(10,70))
                     self.query_obfuscate_adventures['variables']['input']['description'] = ''.join(choice(message) for i in range(100,400))
-                    User.make_query(self.query_obfuscate_adventures)
+                    User.make_mutator(self.query_obfuscate_adventures)
                     # sleep_time = 1 # randint(1, 3)
                     # print(f"Waiting {sleep_time} seconds...")
                     # sleep(sleep_time)
@@ -383,65 +412,92 @@ class User:
                     self.query_obfuscate_memory['variables']['input']['publicId'] = adventure['publicId']
                     self.query_obfuscate_memory['variables']['input']['authorsNote'] = ''.join(choice(message) for i in range(75,150))
                     self.query_obfuscate_memory['variables']['input']['memory'] = ''.join(choice(message) for i in range(250,1000))
-                    User.make_query(self.query_obfuscate_memory)
-                    # sleep_time = 1 # randint(1, 3)
+                    User.make_mutator(self.query_obfuscate_memory)
+                    # sleep_time = randint(1, 3)
                     # print(f"Waiting {sleep_time} seconds...")
                     # sleep(sleep_time)
 
                     self.query_obfuscate_actions['variables']['input']['publicId'] = adventure['publicId']
                     if adventure['actions']:
                         for action in adventure['actions']:
-                            print(f"Obfuscating action: {action['id']}")
-                            self.query_obfuscate_actions['variables']['input']['actionId'] = action['id']
-                            self.query_obfuscate_actions['variables']['input']['text'] = \
-                                ''.join(choice(message) for i in range(100,200))
-                            User.make_query(self.query_obfuscate_actions)
-                            # sleep_time = 1 # randint(1,3)
-                            # print(f"Waiting {sleep_time} seconds...")
-                            # sleep(sleep_time)
+                            while True:
+                                try:
+                                    print(f"Obfuscating action: {action['id']}")
+                                    self.query_obfuscate_actions['variables']['input']['actionId'] = action['id']
+                                    self.query_obfuscate_actions['variables']['input']['text'] = \
+                                        ''.join(choice(message) for i in range(100,200))
+                                    User.make_mutator(self.query_obfuscate_actions)
+                                    # sleep_time = randint(1,3)
+                                    # print(f"Waiting {sleep_time} seconds...")
+                                    # sleep(sleep_time)
+                                except:
+                                    print("Trying again...")
+                                    continue
+                                break
+
 
                     if adventure['undoneWindow']:
                         for action in adventure['undoneWindow']:
-                            print(f"Obfuscating undone action: {action['id']}")
-                            self.query_obfuscate_actions['variables']['input']['actionId'] = action['id']
-                            self.query_obfuscate_actions['variables']['input']['text'] = \
-                                ''.join(choice(message) for i in range(100,200))
-                            User.make_query(self.query_obfuscate_actions)
-                            # sleep_time = 1 # randint(1, 3)
-                            # print(f"Waiting {sleep_time} seconds...")
-                            # sleep(sleep_time)
+                            while True:
+                                try:
+                                    print(f"Obfuscating undone action: {action['id']}")
+                                    self.query_obfuscate_actions['variables']['input']['actionId'] = action['id']
+                                    self.query_obfuscate_actions['variables']['input']['text'] = \
+                                        ''.join(choice(message) for i in range(100,200))
+                                    User.make_mutator(self.query_obfuscate_actions)
+                                    # sleep_time = randint(1, 3)
+                                    # print(f"Waiting {sleep_time} seconds...")
+                                    # sleep(sleep_time)
+                                except:
+                                    print("Trying again...")
+                                    continue
+                                break
 
                     if adventure['worldInfo']:
                         for entry in adventure['worldInfo']:
-                            if 'worldInfoId' in entry:
-                                print(f"Obfuscating world info: {entry['worldInfoId']}")
-                                self.query_obfuscate_world_info['variables']['input']['id'] = entry['worldInfoId']
-                            elif 'id' in entry:
-                                print(f"Obfuscating world info: {entry['id']}")
-                                self.query_obfuscate_world_info['variables']['input']['id'] = entry['id']
-                            else:
-                                print("Latitude messed up backwards compatibility with this adventure's world info. Unable to obfuscate.")
-                                # self.query_obfuscate_adventures['variables']['input']['worldInfo'] = [{}]
-                                # User.make_query(self.query_obfuscate_adventures)
-                                # print("World info orphaned successfully!")
-                                continue
-                            self.query_obfuscate_world_info['variables']['input']['entry'] = \
-                                ''.join(choice(message) for i in range(50, 100))
-                            self.query_obfuscate_world_info['variables']['input']['keys'] = \
-                                ''.join(choice(message) for i in range(10, 20))
-                            User.make_query(self.query_obfuscate_world_info)
-                            # sleep_time = 1 # randint(1, 3)
-                            # print(f"Waiting {sleep_time} seconds...")
-                            # sleep(sleep_time)
+                            while True:
+                                try:
+                                    if 'worldInfoId' in entry:
+                                        print(f"Obfuscating world info: {entry['worldInfoId']}")
+                                        self.query_obfuscate_world_info['variables']['input']['id'] = entry['worldInfoId']
+                                    elif 'id' in entry:
+                                        print(f"Obfuscating world info: {entry['id']}")
+                                        self.query_obfuscate_world_info['variables']['input']['id'] = entry['id']
+                                    else:
+                                        print("Latitude messed up backwards compatibility with this adventure's world info. Unable to obfuscate.")
+                                        # self.query_obfuscate_adventures['variables']['input']['worldInfo'] = [{}]
+                                        # User.make_query(self.query_obfuscate_adventures)
+                                        # print("World info orphaned successfully!")
+                                        continue
+                                    self.query_obfuscate_world_info['variables']['input']['entry'] = \
+                                        ''.join(choice(message) for i in range(50, 100))
+                                    self.query_obfuscate_world_info['variables']['input']['keys'] = \
+                                        ''.join(choice(message) for i in range(10, 20))
+                                    User.make_mutator(self.query_obfuscate_world_info)
+                                    # sleep_time = randint(1, 3)
+                                    # print(f"Waiting {sleep_time} seconds...")
+                                    # sleep(sleep_time)
+                                except:
+                                    print("Trying again...")
+                                    continue
+                                break
                     print(f"Deleting adventure {adventure['publicId']}!\nRemember to empty your trash in-game!")
                     self.query_delete_adventure['variables']['publicId'] = adventure['publicId']
-                    User.make_query(self.query_delete_adventure)
+                    User.make_mutator(self.query_delete_adventure)
                 print('Done obfuscating your adventures!\nRemember to empty your trash in-game!')
         except urllib.error.HTTPError as e:
             print(traceback.format_exception(type(e), e, e.__traceback__))
 
         else:
                 print('No more adventures to obfuscate!')
+
+    def disable_safe_mode(self):
+        try:
+            User.make_mutator(self.mutator_safe_mode)
+            print("Safe Mode disabled!")
+        except urllib.error.HTTPError as e:
+            print(traceback.format_exception(type(e), e, e.__traceback__))
+
 
 screen_flash = """
  ▄▄▄       ██▓   ▓█████▄  █    ██  ███▄    █   ▄████ ▓█████  ▒█████   ███▄    █
@@ -873,6 +929,7 @@ your_content_menu_choices = [
     "[6] Download your saves (bookmarks).",
     "[7] Download all of the above.",
     "[8] Obfuscate and move your adventures to Trash.",
+    "[9] Disable Safe Mode.",
     "[0] Return to main menu. [Default]\n"
 ]
 
@@ -937,6 +994,13 @@ def your_content_menu():
                     print('')
             except Exception as e:
                 print(f'An error occurred obfuscating your adventures.')
+                print(traceback.format_exception(type(e), e, e.__traceback__))
+
+        elif choice == 9:
+            try:
+                user.disable_safe_mode()
+            except Exception as e:
+                print(f'An error occurred disabling Safe Mode.')
                 print(traceback.format_exception(type(e), e, e.__traceback__))
 
         else:
@@ -1403,6 +1467,23 @@ fragment UserAvatarUser on User {
     avatar
     __typename
 }"""
+
+User.mutator_safe_mode_string = """
+mutation($input: GameSettingsInput) {
+    saveGameSettings(input: $input) {
+        id gameSettings {
+            id...GameSettingsGameSettings...DisplaySettingsGameSettings __typename
+        }
+        __typename
+    }
+}
+fragment GameSettingsGameSettings on GameSettings {
+    temperature bannedWords modelType showCommands showModes defaultMode showTips showFeedback textLength playMusic musicVolume playNarration narrationVolume voiceGender voiceAccent voiceId hiddenCommands nsfwGeneration unrestrictedInput actionScoreOptIn showIconText trainTheAi enableAlpha outputWeights customEndpoint isOptOutOfModelExperiments __typename
+}
+fragment DisplaySettingsGameSettings on GameSettings {
+    safeMode textSpeed textFont textSize displayTheme displayColors webActionWindowSize mobileActionWindowSize adventureDisplayMode energyBarDisplayMode energyBarAppearance __typename
+}
+"""
 
 if __name__ == '__main__':
     main()
