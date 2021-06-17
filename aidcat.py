@@ -468,7 +468,6 @@ class User:
                                         # self.query_obfuscate_adventures['variables']['input']['worldInfo'] = [{}]
                                         # User.make_query(self.query_obfuscate_adventures)
                                         # print("World info orphaned successfully!")
-                                        continue
                                     self.query_obfuscate_world_info['variables']['input']['entry'] = \
                                         ''.join(choice(message) for i in range(50, 100))
                                     self.query_obfuscate_world_info['variables']['input']['keys'] = \
